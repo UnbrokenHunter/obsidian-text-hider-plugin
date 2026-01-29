@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "maskMode": "hide",
+  "revealMode": "word",
+  "excludeHeaders": true,
+  "revealSelection": true,
+  "showNotices": true
+}
