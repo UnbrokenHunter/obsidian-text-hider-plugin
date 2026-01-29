@@ -64,9 +64,9 @@ export class SampleSettingTab extends PluginSettingTab {
 			.setName("Mask style")
 			.setDesc("Hide characters entirely, or show ***** in place of letters.")
 			.addDropdown((dd) => {
-				dd.addOption("hide", "Hide (blank)");
-				dd.addOption("password", "Password (***** )");
-				dd.addOption("blur", "Blur");
+				dd.addOption("hide", "Hiden (blank)");
+				dd.addOption("blur", "Blurred");
+				dd.addOption("password", "Password (*****) (may have formatting issues)");
 				dd.setValue(this.plugin.settings.maskMode);
 				dd.onChange(async (value) => {
 					this.plugin.settings.maskMode = value as MaskMode;
