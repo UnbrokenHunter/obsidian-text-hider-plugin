@@ -1,9 +1,9 @@
 import type { Extension } from "@codemirror/state";
 import { EditorView, ViewPlugin, Decoration, type DecorationSet, type ViewUpdate } from "@codemirror/view";
-import type { MyPluginSettings } from "../../settings";
+import type { TextHiderPluginSettings } from "../../settings";
 import { buildMaskDecorations } from "./masking/buildMaskDecorations";
 
-export function buildPrivacyExtension(args: { enabled: boolean; settings: MyPluginSettings }): Extension {
+export function buildPrivacyExtension(args: { enabled: boolean; settings: TextHiderPluginSettings }): Extension {
   const { enabled, settings } = args;
 
   const editorAttrs = EditorView.editorAttributes.of({

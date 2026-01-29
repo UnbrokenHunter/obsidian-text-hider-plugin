@@ -1,9 +1,9 @@
-import { Plugin, Notice } from "obsidian";
-import { DEFAULT_SETTINGS, MyPluginSettings, SampleSettingTab } from "./settings";
+import { Plugin } from "obsidian";
+import { DEFAULT_SETTINGS, TextHiderPluginSettings, TextHiderSettingTab } from "./settings";
 import { PrivacyController } from "./privacy/PrivacyController";
 
-export default class MyPlugin extends Plugin {
-  settings!: MyPluginSettings;
+export default class TextHiderPlugin extends Plugin {
+  settings!: TextHiderPluginSettings;
   private privacy!: PrivacyController;
 
   async onload() {
@@ -11,7 +11,7 @@ export default class MyPlugin extends Plugin {
 
     this.privacy = new PrivacyController(this);
 
-    this.addSettingTab(new SampleSettingTab(this.app, this));
+    this.addSettingTab(new TextHiderSettingTab(this.app, this));
     this.registerCommands();
 
     // Initialize runtime from persisted settings
@@ -43,7 +43,7 @@ export default class MyPlugin extends Plugin {
   }  
 
   async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, (await this.loadData()) as Partial<MyPluginSettings>);
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, (await this.loadData()) as Partial<TextHiderPluginSettings>);
   }
 
   async saveSettings() {

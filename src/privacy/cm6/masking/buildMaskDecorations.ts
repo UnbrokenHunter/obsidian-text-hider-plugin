@@ -1,10 +1,10 @@
 import type { EditorView } from "@codemirror/view";
 import { Decoration } from "@codemirror/view";
-import type { MyPluginSettings } from "../../../settings";
+import type { TextHiderPluginSettings } from "../../../settings";
 import { computeRevealRanges, subtractRanges, mergeRanges, type Range } from "./ranges";
 import { isHeaderLine } from "./headers";
 
-export function buildMaskDecorations(view: EditorView, enabled: boolean, settings: MyPluginSettings) {
+export function buildMaskDecorations(view: EditorView, enabled: boolean, settings: TextHiderPluginSettings) {
   if (!enabled) return Decoration.none;
 
   const builder = new (class {

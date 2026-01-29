@@ -4,7 +4,7 @@ import MyPlugin from "./main";
 export type MaskMode = "hide" | "password" | "blur";
 export type RevealMode = "word" | "letter";
 
-export interface MyPluginSettings {
+export interface TextHiderPluginSettings {
 	/** Persisted global default state */
 	enabled: boolean;
 
@@ -21,7 +21,7 @@ export interface MyPluginSettings {
 	revealSelection: boolean;
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
+export const DEFAULT_SETTINGS: TextHiderPluginSettings = {
 	enabled: false,
 	maskMode: "blur",
 	revealMode: "word",
@@ -29,7 +29,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	revealSelection: true,
 };
 
-export class SampleSettingTab extends PluginSettingTab {
+export class TextHiderSettingTab extends PluginSettingTab {
 	plugin: MyPlugin;
 
 	constructor(app: App, plugin: MyPlugin) {
