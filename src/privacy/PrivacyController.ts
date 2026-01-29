@@ -87,9 +87,21 @@ export class PrivacyController {
    * Obsidian's Editor is wrapped; in CM6 it usually exposes `.cm` as EditorView.
    * This is the common plugin pattern.
    */
-  private getEditorView(view: MarkdownView): EditorView | null {
-    const editorAny = view.editor as any;
-    const cm = editorAny?.cm;
-    return cm ?? null;
-  }
+    private getEditorView(view: MarkdownView): EditorView | null {
+        return getEditorViewFromObsidianEditor(view.editor);
+    }
+}
+
+function getEditorViewFromObsidianEditor(editor: unknown): EditorView | null {
+    if (!editor || typeof editor !== "object") return null;
+
+    // editor is an object; check for a `cm` property
+    const maybe = editor as { cm?: unknown };
+    const cm = maybe.cm;
+
+    // basic sanity check: EditorView has a `state` object
+    if (cm && typeof cm === "object" && "state" in cm) {
+        return cm as EditorView;
+    }
+    return null;
 }
