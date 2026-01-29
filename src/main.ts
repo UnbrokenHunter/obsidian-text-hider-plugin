@@ -20,20 +20,20 @@ export default class TextHiderPlugin extends Plugin {
 
   private registerCommands() {
     this.addCommand({
-      id: "toggle-text-hider",
-      name: "Toggle text hider",
+      id: "toggle-privacy-mode",
+      name: "Toggle privacy mode",
       callback: () => this.privacy.toggleEnabled(),
     });
 
     this.addCommand({
-      id: "enable-text-hider",
-      name: "Enable text hider",
+      id: "enable-privacy-mode",
+      name: "Enable privacy mode",
       callback: () => this.privacy.setEnabled(true),
     });
 
     this.addCommand({
-      id: "disable-text-hider",
-      name: "Disable text hider",
+      id: "disable-privacy-mode",
+      name: "Disable privacy mode",
       callback: () => this.privacy.setEnabled(false),
     });
   }
