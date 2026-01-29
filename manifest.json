@@ -1,0 +1,10 @@
+{
+	"id": "text-hider-plugin",
+	"name": "Text Hider",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Hides the text of the note currently on screen to provide priviacy in public.",
+	"author": "Hunter",
+	"authorUrl": "https://github.com/UnbrokenHunter",
+	"isDesktopOnly": false
+}

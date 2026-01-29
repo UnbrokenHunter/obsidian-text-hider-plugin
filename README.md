@@ -1,0 +1,2 @@
+# obsidian-text-hider-plugin
+
