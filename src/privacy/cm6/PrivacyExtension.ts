@@ -31,11 +31,11 @@ export function buildPrivacyExtension(args: { enabled: boolean; settings: MyPlug
     }
   );
 
-  const theme = EditorView.baseTheme({
+    const theme = EditorView.baseTheme({
     ".privacy-mask-widget": {
-      whiteSpace: "pre",
+        whiteSpace: "pre-wrap",
     },
-  });
+    });
 
   return [plugin, theme];
 }
