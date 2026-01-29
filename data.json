@@ -1,7 +1,7 @@
 {
   "enabled": true,
-  "maskMode": "hide",
-  "revealMode": "none",
+  "maskMode": "asterisks",
+  "revealMode": "word",
   "excludeTitleLine": true,
   "excludeFrontmatter": true,
   "excludeHeaders": true,

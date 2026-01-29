@@ -70,10 +70,11 @@ export function buildMaskDecorations(view: EditorView, enabled: boolean, setting
 
           const length = seg.to - seg.from;
           const cls =
-            settings.maskMode === "hide" ? "privacy-mask-hide" : "privacy-mask-password";
+              settings.maskMode === "hide" ? "privacy-mask-hide" :
+            settings.maskMode === "password" ? "privacy-mask-password" :
+            "privacy-mask-blur";
 
-          const deco = Decoration.mark({ class: cls });
-          builder.add(seg.from, seg.to, deco);
+          builder.add(seg.from, seg.to, Decoration.mark({ class: cls }));
         }
       }
 

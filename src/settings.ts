@@ -1,7 +1,7 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import MyPlugin from "./main";
 
-export type MaskMode = "hide" | "asterisks";
+export type MaskMode = "hide" | "password" | "blur";
 export type RevealMode = "word" | "letter";
 
 export interface MyPluginSettings {
@@ -73,7 +73,8 @@ export class SampleSettingTab extends PluginSettingTab {
 			.setDesc("Hide characters entirely, or show ***** in place of letters.")
 			.addDropdown((dd) => {
 				dd.addOption("hide", "Hide (blank)");
-				dd.addOption("asterisks", "Asterisks (***** )");
+				dd.addOption("password", "Password (***** )");
+				dd.addOption("blur", "Blur");
 				dd.setValue(this.plugin.settings.maskMode);
 				dd.onChange(async (value) => {
 					this.plugin.settings.maskMode = value as MaskMode;

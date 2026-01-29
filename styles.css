@@ -20,14 +20,35 @@
 }
 
 /* “Password” mode: mask glyphs in place (preserves wrapping perfectly) */
-.cm-editor .privacy-mask-password {
+/* PASSWORD MODE: mask glyphs, but force font metrics to match surrounding text */
+.cm-editor .privacy-mask-password,
+.cm-editor .privacy-mask-password * {
   -webkit-text-security: disc !important;
+
+  /* Force same metrics as the original text context */
+  font: inherit !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  font-style: inherit !important;
+  line-height: inherit !important;
+  letter-spacing: inherit !important;
+  font-variant: inherit !important;
+  font-variant-ligatures: none !important; /* avoids ligature-related width surprises */
+
+  /* Remove link decorations that can affect layout/paint */
   text-decoration: none !important;
   text-decoration-color: transparent !important;
 }
 
-.cm-editor .privacy-mask-password * {
-  -webkit-text-security: disc !important;
-  text-decoration: none !important;
+/* Blur mode: preserves wrapping perfectly */
+.cm-editor .privacy-mask-blur,
+.cm-editor .privacy-mask-blur * {
+  filter: blur(6px) !important;
+}
+
+/* Prevent link underline from staying crisp */
+.cm-editor .privacy-mask-blur,
+.cm-editor .privacy-mask-blur * {
   text-decoration-color: transparent !important;
 }
