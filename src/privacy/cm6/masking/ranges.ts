@@ -43,9 +43,10 @@ export function subtractRanges(base: Range[], subtract: Range[]): Range[] {
   return out;
 }
 
-export function computeRevealRanges(state: EditorState, revealMode: "word" | "letter" | "none"): Range[] {
-  if (revealMode === "none") return [];
-
+export function computeRevealRanges(
+  state: EditorState,
+  revealMode: "word" | "letter"
+): Range[] {
   // Use primary cursor (head) for now; later you can support multi-cursor.
   const pos = state.selection.main.head;
 

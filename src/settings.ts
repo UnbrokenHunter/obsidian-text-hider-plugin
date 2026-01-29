@@ -2,7 +2,7 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import MyPlugin from "./main";
 
 export type MaskMode = "hide" | "asterisks";
-export type RevealMode = "word" | "letter" | "none";
+export type RevealMode = "word" | "letter";
 
 export interface MyPluginSettings {
 	/** Persisted global default state */
@@ -88,7 +88,6 @@ export class SampleSettingTab extends PluginSettingTab {
 			.addDropdown((dd) => {
 				dd.addOption("word", "Current word");
 				dd.addOption("letter", "Current letter");
-				dd.addOption("none", "Nothing (full privacy)");
 				dd.setValue(this.plugin.settings.revealMode);
 				dd.onChange(async (value) => {
 					this.plugin.settings.revealMode = value as RevealMode;
