@@ -44,11 +44,7 @@ export default class MyPlugin extends Plugin {
 
   notifySettingsChanged() {
     this.privacy.onSettingsChanged();
-  }
-
-  notify(msg: string) {
-    if (this.settings.showNotices) new Notice(msg);
-  }
+  }  
 
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, (await this.loadData()) as Partial<MyPluginSettings>);

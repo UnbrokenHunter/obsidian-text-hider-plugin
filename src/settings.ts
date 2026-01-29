@@ -19,9 +19,6 @@ export interface MyPluginSettings {
 
 	/** If enabled, selection becomes visible while selected */
 	revealSelection: boolean;
-
-	/** Optional: show a notice when toggling (helpful during dev) */
-	showNotices: boolean;
 }
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {
@@ -30,7 +27,6 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	revealMode: "word",
 	excludeHeaders: true,
 	revealSelection: true,
-	showNotices: true,
 };
 
 export class SampleSettingTab extends PluginSettingTab {
@@ -108,17 +104,6 @@ export class SampleSettingTab extends PluginSettingTab {
 					this.plugin.settings.revealSelection = value;
 					await this.plugin.saveSettings();
 					this.plugin.notifySettingsChanged();
-				})
-			);
-
-		new Setting(containerEl)
-			.setName("Show notices")
-			.setDesc("Show a popup notice when toggling (useful while developing).")
-			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.showNotices).onChange(async (value) => {
-					this.plugin.settings.showNotices = value;
-					await this.plugin.saveSettings();
-					// No need to re-apply masking just because notice preference changed.
 				})
 			);
 

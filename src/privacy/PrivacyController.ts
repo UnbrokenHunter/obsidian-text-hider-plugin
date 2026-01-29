@@ -56,7 +56,6 @@ export class PrivacyController {
     this.plugin.settings.enabled = next;
     void this.plugin.saveSettings();
 
-    this.plugin.notify(`Privacy mode: ${next ? "ON" : "OFF"}`);
     this.apply("command");
   }
 
