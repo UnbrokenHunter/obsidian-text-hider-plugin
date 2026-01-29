@@ -1,103 +1,101 @@
-import { MarkdownView, WorkspaceLeaf } from "obsidian";
 import type MyPlugin from "../main";
-import type { SetEnabledOptions } from "./types";
+import { MarkdownView } from "obsidian";
+import { Compartment, type Extension } from "@codemirror/state";
+import type { EditorView } from "@codemirror/view";
+import { buildPrivacyExtension } from "./cm6/PrivacyExtension";
+
+type ApplyReason = "startup" | "command" | "settings-change";
 
 export class PrivacyController {
-	private plugin: MyPlugin;
+  private plugin: MyPlugin;
 
-	// Runtime state (may mirror settings.enabled, but can be treated separately if desired later)
-	private enabled: boolean;
+  private enabled: boolean;
 
-	// Placeholders for future cleanup of registered listeners/resources
-	private disposers: Array<() => void> = [];
+  private compartment = new Compartment();
+  private baseExtension: Extension;
 
-	constructor(plugin: MyPlugin) {
-		this.plugin = plugin;
-		this.enabled = plugin.settings.enabled;
+  constructor(plugin: MyPlugin) {
+    this.plugin = plugin;
+    this.enabled = plugin.settings.enabled;
 
-		// Infrastructure hooks you’ll likely need later:
-		// - active leaf changes (user switched notes)
-		// - layout changes (panes opened/closed)
-		// - editor changes (cursor/selection events inside CM6)
-		// We DO NOT implement masking here yet; we only wire the scaffolding.
+    // Register ONE editor extension, and reconfigure it via a Compartment.
+    this.baseExtension = this.compartment.of(
+      buildPrivacyExtension({
+        enabled: this.enabled,
+        settings: this.plugin.settings,
+      })
+    );
 
-		this.registerWorkspaceHooks();
-	}
+    this.plugin.registerEditorExtension(this.baseExtension);
 
-	dispose() {
-		for (const d of this.disposers) d();
-		this.disposers = [];
-	}
+    // Re-apply when switching panes/notes
+    const off1 = this.plugin.app.workspace.on("active-leaf-change", () => this.apply("settings-change"));
+    const off2 = this.plugin.app.workspace.on("layout-change", () => this.apply("settings-change"));
+    this.plugin.register(() => this.plugin.app.workspace.offref(off1));
+    this.plugin.register(() => this.plugin.app.workspace.offref(off2));
+  }
 
-	getEnabled() {
-		return this.enabled;
-	}
+  dispose() {
+    // Obsidian will clean up registered editor extensions automatically.
+    // If you later add manual listeners in CM land, clean them there.
+  }
 
-	toggleEnabled() {
-		this.setEnabled(!this.enabled, { persist: true, reason: "command" });
-	}
+  syncFromSettings(opts: { reason: ApplyReason }) {
+    this.enabled = this.plugin.settings.enabled;
+    this.apply(opts.reason);
+  }
 
-	setEnabled(next: boolean, opts: SetEnabledOptions = {}) {
-		const prev = this.enabled;
-		this.enabled = next;
+  toggleEnabled() {
+    this.setEnabled(!this.enabled);
+  }
 
-		const persist = opts.persist ?? true;
+  setEnabled(next: boolean) {
+    if (this.enabled === next) return;
 
-		if (persist) {
-			this.plugin.settings.enabled = next;
-			void this.plugin.saveSettings();
-		}
+    this.enabled = next;
+    this.plugin.settings.enabled = next;
+    void this.plugin.saveSettings();
 
-		// Don’t spam notices unless you want it. Tweak later.
-		this.plugin.notify(`Privacy mode: ${this.enabled ? "ON" : "OFF"}`);
+    this.plugin.notify(`Privacy mode: ${next ? "ON" : "OFF"}`);
+    this.apply("command");
+  }
 
-		// React to the state change (still stubbed)
-		if (prev !== next) this.apply(opts.reason ?? "unknown");
-	}
+  onSettingsChanged() {
+    // Settings tab saved something — push updated config
+    this.apply("settings-change");
+  }
 
-	onSettingsChanged() {
-		// Called after any settings UI change.
-		// Later, you’ll reconfigure masking behavior here.
-		this.apply("settings-change");
-	}
+  private apply(_reason: ApplyReason) {
+    // Reconfigure every active CM6 editor view
+    const ext = buildPrivacyExtension({
+      enabled: this.enabled,
+      settings: this.plugin.settings,
+    });
 
-	apply(_reason: string = "unknown") {
-		// STUB: This is where later you’ll:
-		// - attach/remove CodeMirror decorations
-		// - update masking based on:
-		//   settings.maskMode, settings.revealMode, settings.excludeHeaders, settings.revealSelection
-		// - update current active editor/view
-		//
-		// For now: do nothing.
-	}
+    const effect = this.compartment.reconfigure(ext);
 
-	private registerWorkspaceHooks() {
-		// Active note/editor changed
-		const off1 = this.plugin.app.workspace.on("active-leaf-change", (leaf) => {
-			// Later: re-apply to new editor/view
-			if (leaf) this.apply("active-editor-change");
-		});
-		this.disposers.push(() => this.plugin.app.workspace.offref(off1));
+    for (const view of this.getAllMarkdownEditorViews()) {
+      const cm = this.getEditorView(view);
+      if (!cm) continue;
+      cm.dispatch({ effects: effect });
+    }
+  }
 
-		// Layout changed (panes opened/closed, etc.)
-		const off2 = this.plugin.app.workspace.on("layout-change", () => {
-			// Later: re-apply if needed
-			this.apply("unknown");
-		});
-		this.disposers.push(() => this.plugin.app.workspace.offref(off2));
-	}
+  private *getAllMarkdownEditorViews(): Iterable<MarkdownView> {
+    const leaves = this.plugin.app.workspace.getLeavesOfType("markdown");
+    for (const leaf of leaves) {
+      const view = leaf.view;
+      if (view instanceof MarkdownView) yield view;
+    }
+  }
 
-	/**
-	 * Utility for later: get the active markdown view safely.
-	 */
-	private getActiveMarkdownView(): MarkdownView | null {
-		return this.plugin.app.workspace.getActiveViewOfType(MarkdownView) ?? null;
-	}
-
-	/**
-	 * Utility for later: get active leaf if you need it.
-	 */
-	private getActiveLeaf(): WorkspaceLeaf | null {
-		return this.plugin.app.workspace.getMostRecentLeaf() ?? null;
-	}
+  /**
+   * Obsidian's Editor is wrapped; in CM6 it usually exposes `.cm` as EditorView.
+   * This is the common plugin pattern.
+   */
+  private getEditorView(view: MarkdownView): EditorView | null {
+    const editorAny = view.editor as any;
+    const cm = editorAny?.cm;
+    return cm ?? null;
+  }
 }
