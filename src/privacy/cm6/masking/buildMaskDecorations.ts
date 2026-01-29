@@ -3,7 +3,6 @@ import { Decoration } from "@codemirror/view";
 import type { MyPluginSettings } from "../../../settings";
 import { computeRevealRanges, subtractRanges, mergeRanges, type Range } from "./ranges";
 import { isHeaderLine } from "./headers";
-import { computeExcludedRanges } from "./exclusions";
 
 export function buildMaskDecorations(view: EditorView, enabled: boolean, settings: MyPluginSettings) {
   if (!enabled) return Decoration.none;
@@ -32,12 +31,8 @@ export function buildMaskDecorations(view: EditorView, enabled: boolean, setting
         .map((r) => ({ from: Math.min(r.from, r.to), to: Math.max(r.from, r.to) }))
     : [];
 
-  const excluded = computeExcludedRanges(state, {
-    excludeFrontmatter: settings.excludeFrontmatter,
-    excludeTitleLine: settings.excludeTitleLine,
-  });
 
-  const revealRanges = mergeRanges([...cursorReveal, ...selectionReveal, ...excluded]);
+  const revealRanges = mergeRanges([...cursorReveal, ...selectionReveal]);
 
   // 3) Build masking per visible line
   for (const vr of view.visibleRanges) {

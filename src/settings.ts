@@ -14,12 +14,6 @@ export interface MyPluginSettings {
 	/** What to reveal at the cursor */
 	revealMode: RevealMode;
 
-	/** Keep the note title line visible (first markdown heading line) */
-	excludeTitleLine: boolean;
-
-	/** Keep YAML frontmatter block visible */
-	excludeFrontmatter: boolean;
-
 	/** Keep Markdown headers visible (#, ##, etc.) */
 	excludeHeaders: boolean;
 
@@ -34,8 +28,6 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	enabled: false,
 	maskMode: "hide",
 	revealMode: "word",
-	excludeTitleLine: true,
-	excludeFrontmatter: true,
 	excludeHeaders: true,
 	revealSelection: true,
 	showNotices: true,
@@ -96,28 +88,6 @@ export class SampleSettingTab extends PluginSettingTab {
 					this.plugin.notifySettingsChanged();
 				});
 			});
-
-		new Setting(containerEl)
-			.setName("Keep title line visible")
-			.setDesc("If your note starts with a markdown heading, keep that line visible.")
-			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.excludeTitleLine).onChange(async (value) => {
-				this.plugin.settings.excludeTitleLine = value;
-				await this.plugin.saveSettings();
-				this.plugin.notifySettingsChanged();
-				})
-			);
-
-		new Setting(containerEl)
-			.setName("Keep frontmatter visible")
-			.setDesc("Keep YAML frontmatter (--- ... ---) visible at the top of the note.")
-			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.excludeFrontmatter).onChange(async (value) => {
-				this.plugin.settings.excludeFrontmatter = value;
-				await this.plugin.saveSettings();
-				this.plugin.notifySettingsChanged();
-				})
-			);
 
 		new Setting(containerEl)
 			.setName("Exclude headers")
