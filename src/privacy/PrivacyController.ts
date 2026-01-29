@@ -35,11 +35,6 @@ export class PrivacyController {
     this.plugin.register(() => this.plugin.app.workspace.offref(off2));
   }
 
-  dispose() {
-    // Obsidian will clean up registered editor extensions automatically.
-    // If you later add manual listeners in CM land, clean them there.
-  }
-
   syncFromSettings(opts: { reason: ApplyReason }) {
     this.enabled = this.plugin.settings.enabled;
     this.apply(opts.reason);

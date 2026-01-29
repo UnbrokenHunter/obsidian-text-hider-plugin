@@ -18,10 +18,6 @@ export default class MyPlugin extends Plugin {
     this.privacy.syncFromSettings({ reason: "startup" });
   }
 
-  onunload() {
-    this.privacy?.dispose();
-  }
-
   private registerCommands() {
     this.addCommand({
       id: "toggle-privacy-mode",

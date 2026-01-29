@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "maskMode": "blur",
-  "revealMode": "word",
+  "revealMode": "letter",
   "excludeHeaders": true,
   "revealSelection": true,
   "showNotices": true,
