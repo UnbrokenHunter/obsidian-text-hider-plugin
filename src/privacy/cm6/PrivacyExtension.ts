@@ -15,7 +15,6 @@ export function buildPrivacyExtension(args: { enabled: boolean; settings: MyPlug
       }
 
       update(update: ViewUpdate) {
-        // If disabled, keep decorations empty.
         if (!enabled) {
           this.decorations = Decoration.none;
           return;
@@ -26,16 +25,8 @@ export function buildPrivacyExtension(args: { enabled: boolean; settings: MyPlug
         }
       }
     },
-    {
-      decorations: (v) => v.decorations,
-    }
+    { decorations: (v) => v.decorations }
   );
 
-    const theme = EditorView.baseTheme({
-    ".privacy-mask-widget": {
-        whiteSpace: "pre-wrap",
-    },
-    });
-
-  return [plugin, theme];
+  return [plugin];
 }

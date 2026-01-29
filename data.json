@@ -1,7 +1,9 @@
 {
   "enabled": true,
   "maskMode": "hide",
-  "revealMode": "word",
+  "revealMode": "none",
+  "excludeTitleLine": true,
+  "excludeFrontmatter": true,
   "excludeHeaders": true,
   "revealSelection": true,
   "showNotices": true

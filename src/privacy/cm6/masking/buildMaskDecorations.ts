@@ -1,7 +1,6 @@
 import type { EditorView } from "@codemirror/view";
 import { Decoration } from "@codemirror/view";
 import type { MyPluginSettings } from "../../../settings";
-import { MaskWidget } from "./widgets";
 import { computeRevealRanges, subtractRanges, mergeRanges, type Range } from "./ranges";
 import { isHeaderLine } from "./headers";
 import { computeExcludedRanges } from "./exclusions";
@@ -70,10 +69,10 @@ export function buildMaskDecorations(view: EditorView, enabled: boolean, setting
           if (seg.to <= seg.from) continue;
 
           const length = seg.to - seg.from;
-          const deco = Decoration.replace({
-            widget: new MaskWidget(length, settings.maskMode),
-            inclusive: false,
-          });
+          const cls =
+            settings.maskMode === "hide" ? "privacy-mask-hide" : "privacy-mask-password";
+
+          const deco = Decoration.mark({ class: cls });
           builder.add(seg.from, seg.to, deco);
         }
       }
