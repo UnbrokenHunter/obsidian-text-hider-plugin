@@ -1,9 +1,9 @@
 {
   "enabled": true,
   "maskMode": "blur",
-  "revealMode": "letter",
+  "revealMode": "word",
   "excludeHeaders": true,
-  "revealSelection": true,
+  "revealSelection": false,
   "showNotices": true,
   "excludeTitleLine": true,
   "excludeFrontmatter": true
