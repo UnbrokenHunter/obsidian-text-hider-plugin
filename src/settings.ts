@@ -44,7 +44,7 @@ display(): void {
 	// --- Global Toggle (heading row) ---
 	new Setting(containerEl)
 		.setName("Enable text hider")
-		.setDesc("Turn masking on/off. For optimal use, set a hotkey for the Toggle command. You can also bind hotkeys for Enable/Disable. All commands are also available from the Command Palette.")
+		.setDesc("Turn masking on/off. For optimal use, set a hotkey for the toggle command. You can also bind hotkeys for enable/disable. All commands are also available from the command palette.")
 		.addToggle((toggle) =>
 			toggle.setValue(this.plugin.settings.enabled).onChange(async (value) => {
 				this.plugin.settings.enabled = value;
@@ -58,7 +58,7 @@ display(): void {
 
 	new Setting(containerEl)
 		.setName("Mask mode")
-		.setDesc("How hidden text is shown (Hide is cleanest, Blur is softer, Password may vary by theme).")
+		.setDesc("How hidden text is shown (hide is cleanest, blur is softer, password may vary by theme).")
 		.addDropdown((dd) => {
 			dd.addOption("hide", "Hide");
 			dd.addOption("blur", "Blur");
