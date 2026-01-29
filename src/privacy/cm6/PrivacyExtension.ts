@@ -6,6 +6,10 @@ import { buildMaskDecorations } from "./masking/buildMaskDecorations";
 export function buildPrivacyExtension(args: { enabled: boolean; settings: MyPluginSettings }): Extension {
   const { enabled, settings } = args;
 
+  const editorAttrs = EditorView.editorAttributes.of({
+    class: enabled ? "privacy-mode-enabled" : "",
+  });
+
   const plugin = ViewPlugin.fromClass(
     class PrivacyMaskPlugin {
       decorations: DecorationSet;
@@ -19,7 +23,6 @@ export function buildPrivacyExtension(args: { enabled: boolean; settings: MyPlug
           this.decorations = Decoration.none;
           return;
         }
-
         if (update.docChanged || update.selectionSet || update.viewportChanged) {
           this.decorations = buildMaskDecorations(update.view, enabled, settings);
         }
@@ -28,5 +31,5 @@ export function buildPrivacyExtension(args: { enabled: boolean; settings: MyPlug
     { decorations: (v) => v.decorations }
   );
 
-  return [plugin];
+  return [editorAttrs, plugin];
 }

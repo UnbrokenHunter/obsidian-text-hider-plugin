@@ -1,16 +1,5 @@
-/* Hide mode: keep layout/wrapping but make text invisible */
-.cm-editor .privacy-mask-hide {
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
-  text-shadow: none !important;
-  background: transparent !important;
-
-  /* links often leak underline/decoration */
-  text-decoration: none !important;
-  text-decoration-color: transparent !important;
-}
-
-/* If link tokens wrap nested spans, mask them too */
+/* Hide mode */
+.cm-editor .privacy-mask-hide,
 .cm-editor .privacy-mask-hide * {
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
@@ -19,36 +8,48 @@
   text-decoration-color: transparent !important;
 }
 
-/* “Password” mode: mask glyphs in place (preserves wrapping perfectly) */
-/* PASSWORD MODE: mask glyphs, but force font metrics to match surrounding text */
+/* Password mode */
 .cm-editor .privacy-mask-password,
 .cm-editor .privacy-mask-password * {
   -webkit-text-security: disc !important;
-
-  /* Force same metrics as the original text context */
   font: inherit !important;
-  font-family: inherit !important;
-  font-size: inherit !important;
-  font-weight: inherit !important;
-  font-style: inherit !important;
-  line-height: inherit !important;
-  letter-spacing: inherit !important;
-  font-variant: inherit !important;
-  font-variant-ligatures: none !important; /* avoids ligature-related width surprises */
-
-  /* Remove link decorations that can affect layout/paint */
+  font-variant-ligatures: none !important;
   text-decoration: none !important;
   text-decoration-color: transparent !important;
 }
 
-/* Blur mode: preserves wrapping perfectly */
+/* Blur mode */
 .cm-editor .privacy-mask-blur,
 .cm-editor .privacy-mask-blur * {
   filter: blur(6px) !important;
+  text-decoration-color: transparent !important;
 }
 
-/* Prevent link underline from staying crisp */
-.cm-editor .privacy-mask-blur,
-.cm-editor .privacy-mask-blur * {
-  text-decoration-color: transparent !important;
+/* --- Privacy mode: remove current-line "rectangle" artifacts --- */
+.cm-editor.privacy-mode-enabled .cm-activeLine,
+.cm-editor.privacy-mode-enabled .cm-line.cm-activeLine,
+.cm-editor.privacy-mode-enabled .cm-activeLineGutter {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+}
+
+.cm-editor.privacy-mode-enabled .cm-activeLine::before,
+.cm-editor.privacy-mode-enabled .cm-activeLine::after,
+.cm-editor.privacy-mode-enabled .cm-line.cm-activeLine::before,
+.cm-editor.privacy-mode-enabled .cm-line.cm-activeLine::after,
+.cm-editor.privacy-mode-enabled .cm-activeLineGutter::before,
+.cm-editor.privacy-mode-enabled .cm-activeLineGutter::after {
+  content: none !important;
+  display: none !important;
+}
+
+.cm-editor.privacy-mode-enabled .cm-lineHighlight,
+.cm-editor.privacy-mode-enabled .cm-highlightSpace {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
 }
