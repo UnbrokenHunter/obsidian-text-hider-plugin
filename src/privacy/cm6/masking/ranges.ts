@@ -47,21 +47,16 @@ export function computeRevealRanges(
   state: EditorState,
   revealMode: "word" | "letter"
 ): Range[] {
-  // Use primary cursor (head) for now; later you can support multi-cursor.
   const pos = state.selection.main.head;
 
   if (revealMode === "letter") {
-    // Reveal character "under" cursor if possible, else previous
     if (pos < state.doc.length) return [{ from: pos, to: pos + 1 }];
     if (pos > 0) return [{ from: pos - 1, to: pos }];
     return [];
   }
 
-  // revealMode === "word"
   const line = state.doc.lineAt(pos);
   const idx = pos - line.from;
-
-  const isWordChar = (ch: string) => /[A-Za-z0-9_]/.test(ch);
 
   let left = idx;
   while (left > 0 && isWordChar(line.text.charAt(left - 1))) left--;
@@ -69,10 +64,11 @@ export function computeRevealRanges(
   let right = idx;
   while (right < line.text.length && isWordChar(line.text.charAt(right))) right++;
 
-  if (right <= left) {
-    // No word char at cursor — reveal nothing
-    return [];
-  }
+  if (right <= left) return [];
 
   return [{ from: line.from + left, to: line.from + right }];
+}
+
+function isWordChar(ch: string): boolean {
+  return /[\p{L}\p{N}\p{M}\p{Pc}'\u2019]/u.test(ch);
 }

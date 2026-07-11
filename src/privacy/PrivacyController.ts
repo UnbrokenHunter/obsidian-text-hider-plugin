@@ -3,8 +3,7 @@ import { MarkdownView } from "obsidian";
 import { Compartment, type Extension } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
 import { buildPrivacyExtension } from "./cm6/PrivacyExtension";
-
-type ApplyReason = "startup" | "command" | "settings-change";
+import type { ApplyReason, SetEnabledOptions } from "./types";
 
 export class PrivacyController {
   private plugin: MyPlugin;
@@ -18,7 +17,7 @@ export class PrivacyController {
     this.plugin = plugin;
     this.enabled = plugin.settings.enabled;
 
-    // Register ONE editor extension, and reconfigure it via a Compartment.
+    // Register one editor extension, then reconfigure it through a compartment.
     this.baseExtension = this.compartment.of(
       buildPrivacyExtension({
         enabled: this.enabled,
@@ -28,9 +27,8 @@ export class PrivacyController {
 
     this.plugin.registerEditorExtension(this.baseExtension);
 
-    // Re-apply when switching panes/notes
-    const off1 = this.plugin.app.workspace.on("active-leaf-change", () => this.apply("settings-change"));
-    const off2 = this.plugin.app.workspace.on("layout-change", () => this.apply("settings-change"));
+    const off1 = this.plugin.app.workspace.on("active-leaf-change", () => this.apply("active-editor-change"));
+    const off2 = this.plugin.app.workspace.on("layout-change", () => this.apply("active-editor-change"));
     this.plugin.register(() => this.plugin.app.workspace.offref(off1));
     this.plugin.register(() => this.plugin.app.workspace.offref(off2));
   }
@@ -44,23 +42,24 @@ export class PrivacyController {
     this.setEnabled(!this.enabled);
   }
 
-  setEnabled(next: boolean) {
+  setEnabled(next: boolean, opts: SetEnabledOptions = {}) {
     if (this.enabled === next) return;
 
     this.enabled = next;
-    this.plugin.settings.enabled = next;
-    void this.plugin.saveSettings();
+    if (opts.persist ?? true) {
+      this.plugin.settings.enabled = next;
+      void this.plugin.saveSettings();
+    }
 
-    this.apply("command");
+    this.apply(opts.reason ?? "command");
   }
 
   onSettingsChanged() {
-    // Settings tab saved something — push updated config
+    this.enabled = this.plugin.settings.enabled;
     this.apply("settings-change");
   }
 
   private apply(_reason: ApplyReason) {
-    // Reconfigure every active CM6 editor view
     const ext = buildPrivacyExtension({
       enabled: this.enabled,
       settings: this.plugin.settings,
@@ -83,25 +82,19 @@ export class PrivacyController {
     }
   }
 
-  /**
-   * Obsidian's Editor is wrapped; in CM6 it usually exposes `.cm` as EditorView.
-   * This is the common plugin pattern.
-   */
-    private getEditorView(view: MarkdownView): EditorView | null {
-        return getEditorViewFromObsidianEditor(view.editor);
-    }
+  private getEditorView(view: MarkdownView): EditorView | null {
+    return getEditorViewFromObsidianEditor(view.editor);
+  }
 }
 
 function getEditorViewFromObsidianEditor(editor: unknown): EditorView | null {
-    if (!editor || typeof editor !== "object") return null;
+  if (!editor || typeof editor !== "object") return null;
 
-    // editor is an object; check for a `cm` property
-    const maybe = editor as { cm?: unknown };
-    const cm = maybe.cm;
+  const maybe = editor as { cm?: unknown };
+  const cm = maybe.cm;
 
-    // basic sanity check: EditorView has a `state` object
-    if (cm && typeof cm === "object" && "state" in cm) {
-        return cm as EditorView;
-    }
-    return null;
+  if (cm && typeof cm === "object" && "state" in cm) {
+    return cm as EditorView;
+  }
+  return null;
 }

@@ -97,4 +97,4 @@ Feedback, bug reports, and suggestions are welcome!
 
 ## License
 
-ISC
+0BSD
