@@ -1,33 +1,19 @@
 # Text Hider
 
-**Text Hider** is an Obsidian plugin that visually hides your note content while you’re editing. Perfect for writing notes in public spaces without shoulder-surfing.
-
-Text Hider will **not**:
-
-- Change or encrypt your notes
-- Modify files on disk
-
-It works entirely at the editor display level. Turn it off at any time and your notes appear exactly as before.
-
----
+**Text Hider** is an Obsidian plugin that visually hides note content while you edit or read it in public. It only changes what is displayed: notes are never changed, encrypted, or written to disk differently.
 
 ## Features
 
-- Toggleable text masking
-- Multiple masking styles:
-    - **Hide** – completely invisible text (best layout stability)
-    - **Blur** – obscures text while preserving structure
-    - **Password** – bullet-style masking (may vary by theme)
-- Reveal only what you need:
-    - Current word **or**
-    - Current letter
-- Optional exceptions:
-    - Keep Markdown headers visible
-    - Reveal selected text while selecting
+- Toggleable text masking with Hide, Blur, and Password modes
+- Adjustable blur strength
+- Reveal the current word or letter at every cursor
+- Optionally reveal each cursor's entire current line
+- Optionally reveal selected text
+- Keep Markdown headers visible
+- Mask rendered text in Reading View
+- Optional, clickable status bar indicator
 
----
-
-## Commands & Hotkeys
+## Commands and hotkeys
 
 Text Hider provides three commands:
 
@@ -35,15 +21,7 @@ Text Hider provides three commands:
 - **Enable privacy mode**
 - **Disable privacy mode**
 
-For best use, bind a hotkey to **Toggle privacy mode**:
-
-1. Open **Settings → Hotkeys**
-2. Search for **“Text Hider”**
-3. Assign your preferred keybinding
-
-All commands are also available via the **Command Palette**.
-
----
+Bind a hotkey in **Settings -> Hotkeys** or use the Command Palette. When the status bar indicator is enabled, selecting it also toggles privacy mode.
 
 ## Settings
 
@@ -51,49 +29,32 @@ All commands are also available via the **Command Palette**.
 
 Choose how hidden text is displayed:
 
-- **Hide** – fully invisible (recommended for best layout consistency)
-  ![Hide mode demo](imgs/hide_mode_demo.png)
+- **Hide**: completely invisible while preserving layout.
+- **Blur**: obscures text while preserving structure. Use **Blur strength** to control the effect.
+- **Password**: bullet-style masking. Appearance can vary by theme.
 
-- **Blur** – visually obscured but readable up close ![Blur mode demo](imgs/blur_mode_demo.png)
+### Reveal behavior
 
-- **Password** – masked with bullet characters (appearance may vary by theme)
-  ![Password mode demo](imgs/password_mode_demo.png)
+Choose whether the current word or current letter remains readable at each cursor. You can also reveal all selected text or each cursor's entire current line.
 
-### Reveal mode
+### Views and status
 
-Choose what remains readable at the cursor:
+**Mask Reading View** protects rendered Markdown text as well as Live Preview and Source mode. Images and other media remain unchanged. **Show status bar indicator** adds an on/off indicator that can be selected to toggle the plugin.
 
-- **Current word**
-  ![Current word demo](imgs/word_select_demo.png)
+## Notes and limitations
 
-- **Current letter**
-  ![Current letter demo](imgs/letter_select_demo.png)
+- Text Hider runs entirely locally and makes no network requests.
+- Reading View masking wraps rendered text only while privacy mode is enabled. It does not alter the note source.
+- Some themes may slightly affect blur or password masking appearance.
 
-### Exclude headers
+## Development
 
-Keeps Markdown headers (`#`, `##`, `###`, etc.) visible while the rest of the note is masked.
-
-### Reveal selected text
-
-When enabled, any text you select becomes visible while selected.
-![Reveal text demo](imgs/selected_text_demo.png)
-
----
-
-## Notes & limitations
-
-- Masking applies only to the **editor view** (Live Preview / Source mode)
-- Reading View masking may be added in the future
-- Some themes may slightly affect blur or password masking appearance
-
----
-
-## Development status
-
-Text Hider is under active development.  
-Feedback, bug reports, and suggestions are welcome!
-
----
+```bash
+npm install
+npm test
+npm run lint
+npm run build
+```
 
 ## License
 

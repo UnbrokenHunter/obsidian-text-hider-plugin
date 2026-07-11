@@ -10,12 +10,13 @@ export default class TextHiderPlugin extends Plugin {
     await this.loadSettings();
 
     this.privacy = new PrivacyController(this);
-
     this.addSettingTab(new TextHiderSettingTab(this.app, this));
     this.registerCommands();
-
-    // Initialize runtime from persisted settings
     this.privacy.syncFromSettings({ reason: "startup" });
+  }
+
+  onunload() {
+    this.privacy.destroy();
   }
 
   private registerCommands() {
@@ -40,10 +41,19 @@ export default class TextHiderPlugin extends Plugin {
 
   notifySettingsChanged() {
     this.privacy.onSettingsChanged();
-  }  
+  }
 
   async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, (await this.loadData()) as Partial<TextHiderPluginSettings>);
+    const saved = (await this.loadData()) as Partial<TextHiderPluginSettings>;
+    const blurStrength = saved.blurStrength;
+    this.settings = {
+      ...DEFAULT_SETTINGS,
+      ...saved,
+      blurStrength:
+        typeof blurStrength === "number" && Number.isFinite(blurStrength)
+          ? Math.min(16, Math.max(1, blurStrength))
+          : DEFAULT_SETTINGS.blurStrength,
+    };
   }
 
   async saveSettings() {

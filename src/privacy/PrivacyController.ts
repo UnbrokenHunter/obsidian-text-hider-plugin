@@ -5,19 +5,20 @@ import type { EditorView } from "@codemirror/view";
 import { buildPrivacyExtension } from "./cm6/PrivacyExtension";
 import type { ApplyReason, SetEnabledOptions } from "./types";
 
+const READING_MASK_CLASS = "privacy-reading-mask";
+const READING_VIEW_CLASS = "privacy-reading-view-enabled";
+const READING_EXCLUDED_SELECTOR = "script, style, textarea, input, button, select, option, svg";
+
 export class PrivacyController {
   private plugin: MyPlugin;
-
   private enabled: boolean;
-
   private compartment = new Compartment();
   private baseExtension: Extension;
+  private statusEl: HTMLElement;
 
   constructor(plugin: MyPlugin) {
     this.plugin = plugin;
     this.enabled = plugin.settings.enabled;
-
-    // Register one editor extension, then reconfigure it through a compartment.
     this.baseExtension = this.compartment.of(
       buildPrivacyExtension({
         enabled: this.enabled,
@@ -26,11 +27,25 @@ export class PrivacyController {
     );
 
     this.plugin.registerEditorExtension(this.baseExtension);
+    this.statusEl = this.plugin.addStatusBarItem();
+    this.statusEl.addClass("privacy-status-indicator");
+    this.statusEl.setAttribute("role", "button");
+    this.statusEl.setAttribute("tabindex", "0");
+    this.plugin.registerDomEvent(this.statusEl, "click", () => this.toggleEnabled());
+    this.plugin.registerDomEvent(this.statusEl, "keydown", (event: KeyboardEvent) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      this.toggleEnabled();
+    });
 
-    const off1 = this.plugin.app.workspace.on("active-leaf-change", () => this.apply("active-editor-change"));
-    const off2 = this.plugin.app.workspace.on("layout-change", () => this.apply("active-editor-change"));
-    this.plugin.register(() => this.plugin.app.workspace.offref(off1));
-    this.plugin.register(() => this.plugin.app.workspace.offref(off2));
+    this.plugin.registerMarkdownPostProcessor((element) => {
+      if (this.shouldMaskReadingView()) this.maskReadingContent(element);
+    });
+
+    const offActiveLeaf = this.plugin.app.workspace.on("active-leaf-change", () => this.apply("active-editor-change"));
+    const offLayout = this.plugin.app.workspace.on("layout-change", () => this.apply("active-editor-change"));
+    this.plugin.register(() => this.plugin.app.workspace.offref(offActiveLeaf));
+    this.plugin.register(() => this.plugin.app.workspace.offref(offLayout));
   }
 
   syncFromSettings(opts: { reason: ApplyReason }) {
@@ -59,26 +74,121 @@ export class PrivacyController {
     this.apply("settings-change");
   }
 
+  destroy() {
+    this.syncReadingViews(false);
+    this.statusEl.remove();
+  }
+
   private apply(_reason: ApplyReason) {
-    const ext = buildPrivacyExtension({
+    const extension = buildPrivacyExtension({
       enabled: this.enabled,
       settings: this.plugin.settings,
     });
+    const effect = this.compartment.reconfigure(extension);
 
-    const effect = this.compartment.reconfigure(ext);
+    for (const view of this.getAllMarkdownViews()) {
+      const editorView = this.getEditorView(view);
+      if (editorView) editorView.dispatch({ effects: effect });
+    }
 
-    for (const view of this.getAllMarkdownEditorViews()) {
-      const cm = this.getEditorView(view);
-      if (!cm) continue;
-      cm.dispatch({ effects: effect });
+    this.syncReadingViews(this.shouldMaskReadingView());
+    this.updateStatusIndicator();
+  }
+
+  private shouldMaskReadingView(): boolean {
+    return this.enabled && this.plugin.settings.maskReadingView;
+  }
+
+  private syncReadingViews(mask: boolean) {
+    for (const view of this.getAllMarkdownViews()) {
+      if (view.getMode() !== "preview") continue;
+      this.syncReadingView(view.previewMode.containerEl, mask);
     }
   }
 
-  private *getAllMarkdownEditorViews(): Iterable<MarkdownView> {
+  private syncReadingView(container: HTMLElement, mask: boolean) {
+    container.toggleClass(READING_VIEW_CLASS, mask);
+
+    if (!mask) {
+      container.style.removeProperty("--text-hider-blur-strength");
+      this.unmaskReadingContent(container);
+      return;
+    }
+
+    container.style.setProperty("--text-hider-blur-strength", `${this.plugin.settings.blurStrength}px`);
+    this.updateReadingMaskClasses(container);
+    this.maskReadingContent(container);
+  }
+
+  private maskReadingContent(root: HTMLElement) {
+    const nodeFilter = root.ownerDocument.defaultView?.NodeFilter;
+    if (!nodeFilter) return;
+
+    const walker = root.ownerDocument.createTreeWalker(root, nodeFilter.SHOW_TEXT);
+    const textNodes: Text[] = [];
+
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if (node.nodeType === 3 && this.canMaskReadingText(node as Text)) textNodes.push(node as Text);
+    }
+
+    for (const textNode of textNodes) {
+      const parent = textNode.parentElement;
+      if (!parent) continue;
+
+      const span = root.ownerDocument.createElement("span");
+      span.className = `${READING_MASK_CLASS} ${this.getReadingMaskClass()}`;
+      parent.replaceChild(span, textNode);
+      span.appendChild(textNode);
+    }
+  }
+
+  private canMaskReadingText(textNode: Text): boolean {
+    if (!textNode.data.trim()) return false;
+
+    const parent = textNode.parentElement;
+    if (!parent) return false;
+    if (parent.closest(`.${READING_MASK_CLASS}`)) return false;
+    if (parent.closest(READING_EXCLUDED_SELECTOR)) return false;
+    if (this.plugin.settings.excludeHeaders && parent.closest("h1, h2, h3, h4, h5, h6")) return false;
+
+    return true;
+  }
+
+  private updateReadingMaskClasses(root: HTMLElement) {
+    for (const span of this.getReadingMaskSpans(root)) {
+      span.className = `${READING_MASK_CLASS} ${this.getReadingMaskClass()}`;
+    }
+  }
+
+  private getReadingMaskSpans(root: HTMLElement): HTMLElement[] {
+    return Array.from(root.querySelectorAll<HTMLElement>(`.${READING_MASK_CLASS}`));
+  }
+  private unmaskReadingContent(root: HTMLElement) {
+    for (const span of this.getReadingMaskSpans(root)) {
+      span.replaceWith(...Array.from(span.childNodes));
+    }
+    root.normalize();
+  }
+
+  private getReadingMaskClass(): string {
+    if (this.plugin.settings.maskMode === "hide") return "privacy-reading-mask-hide";
+    if (this.plugin.settings.maskMode === "password") return "privacy-reading-mask-password";
+    return "privacy-reading-mask-blur";
+  }
+
+  private updateStatusIndicator() {
+    const isVisible = this.plugin.settings.showStatusBar;
+    this.statusEl.hidden = !isVisible;
+    this.statusEl.toggleClass("is-active", this.enabled);
+    this.statusEl.setText(`Text Hider: ${this.enabled ? "On" : "Off"}`);
+    this.statusEl.setAttribute("aria-label", "Toggle privacy mode");
+    this.statusEl.setAttribute("title", `Text Hider is ${this.enabled ? "on" : "off"}. Select to toggle.`);
+  }
+
+  private *getAllMarkdownViews(): Iterable<MarkdownView> {
     const leaves = this.plugin.app.workspace.getLeavesOfType("markdown");
     for (const leaf of leaves) {
-      const view = leaf.view;
-      if (view instanceof MarkdownView) yield view;
+      if (leaf.view instanceof MarkdownView) yield leaf.view;
     }
   }
 
@@ -90,11 +200,9 @@ export class PrivacyController {
 function getEditorViewFromObsidianEditor(editor: unknown): EditorView | null {
   if (!editor || typeof editor !== "object") return null;
 
-  const maybe = editor as { cm?: unknown };
-  const cm = maybe.cm;
-
-  if (cm && typeof cm === "object" && "state" in cm) {
-    return cm as EditorView;
-  }
-  return null;
+  const maybeEditor = editor as { cm?: unknown };
+  const editorView = maybeEditor.cm;
+  return editorView && typeof editorView === "object" && "state" in editorView
+    ? (editorView as EditorView)
+    : null;
 }

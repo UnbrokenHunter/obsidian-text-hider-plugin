@@ -17,7 +17,28 @@
 /* Blur mode */
 .markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .privacy-mask-blur,
 .markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .privacy-mask-blur * {
-  filter: blur(6px);
+  filter: blur(var(--text-hider-blur-strength, 6px));
+}
+
+/* Reading View */
+.markdown-reading-view.privacy-reading-view-enabled .privacy-reading-mask-hide {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+.markdown-reading-view.privacy-reading-view-enabled .privacy-reading-mask-password {
+  -webkit-text-security: disc;
+  font: inherit;
+  font-variant-ligatures: none;
+}
+
+.markdown-reading-view.privacy-reading-view-enabled .privacy-reading-mask-blur {
+  filter: blur(var(--text-hider-blur-strength, 6px));
+}
+
+.privacy-status-indicator {
+  cursor: pointer;
 }
 
 /* Privacy mode: remove current-line rectangle artifacts */
