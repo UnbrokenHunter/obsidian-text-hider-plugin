@@ -1,5 +1,5 @@
 import type { Extension } from "@codemirror/state";
-import { EditorView, ViewPlugin, Decoration, type DecorationSet, type ViewUpdate } from "@codemirror/view";
+import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate } from "@codemirror/view";
 import type { TextHiderPluginSettings } from "../../settings";
 import { buildMaskDecorations } from "./masking/buildMaskDecorations";
 
@@ -8,6 +8,7 @@ export function buildPrivacyExtension(args: { enabled: boolean; settings: TextHi
 
   const editorAttrs = EditorView.editorAttributes.of({
     class: enabled ? "privacy-mode-enabled" : "",
+    style: `--text-hider-blur-strength: ${settings.blurStrength}px;`,
   });
 
   const plugin = ViewPlugin.fromClass(
@@ -28,7 +29,7 @@ export function buildPrivacyExtension(args: { enabled: boolean; settings: TextHi
         }
       }
     },
-    { decorations: (v) => v.decorations }
+    { decorations: (view) => view.decorations }
   );
 
   return [editorAttrs, plugin];

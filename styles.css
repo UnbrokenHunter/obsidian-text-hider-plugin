@@ -1,55 +1,71 @@
 /* Hide mode */
-.cm-editor .privacy-mask-hide,
-.cm-editor .privacy-mask-hide * {
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
-  text-shadow: none !important;
-  text-decoration: none !important;
-  text-decoration-color: transparent !important;
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .privacy-mask-hide,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .privacy-mask-hide * {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
 }
 
 /* Password mode */
-.cm-editor .privacy-mask-password,
-.cm-editor .privacy-mask-password * {
-  -webkit-text-security: disc !important;
-  font: inherit !important;
-  font-variant-ligatures: none !important;
-  text-decoration: none !important;
-  text-decoration-color: transparent !important;
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .privacy-mask-password,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .privacy-mask-password * {
+  -webkit-text-security: disc;
+  font: inherit;
+  font-variant-ligatures: none;
 }
 
 /* Blur mode */
-.cm-editor .privacy-mask-blur,
-.cm-editor .privacy-mask-blur * {
-  filter: blur(6px) !important;
-  text-decoration-color: transparent !important;
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .privacy-mask-blur,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .privacy-mask-blur * {
+  filter: blur(var(--text-hider-blur-strength, 6px));
 }
 
-/* --- Privacy mode: remove current-line "rectangle" artifacts --- */
-.cm-editor.privacy-mode-enabled .cm-activeLine,
-.cm-editor.privacy-mode-enabled .cm-line.cm-activeLine,
-.cm-editor.privacy-mode-enabled .cm-activeLineGutter {
-  background: transparent !important;
-  background-color: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-  outline: none !important;
+/* Reading View */
+.markdown-reading-view.privacy-reading-view-enabled .privacy-reading-mask-hide {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
 }
 
-.cm-editor.privacy-mode-enabled .cm-activeLine::before,
-.cm-editor.privacy-mode-enabled .cm-activeLine::after,
-.cm-editor.privacy-mode-enabled .cm-line.cm-activeLine::before,
-.cm-editor.privacy-mode-enabled .cm-line.cm-activeLine::after,
-.cm-editor.privacy-mode-enabled .cm-activeLineGutter::before,
-.cm-editor.privacy-mode-enabled .cm-activeLineGutter::after {
-  content: none !important;
-  display: none !important;
+.markdown-reading-view.privacy-reading-view-enabled .privacy-reading-mask-password {
+  -webkit-text-security: disc;
+  font: inherit;
+  font-variant-ligatures: none;
 }
 
-.cm-editor.privacy-mode-enabled .cm-lineHighlight,
-.cm-editor.privacy-mode-enabled .cm-highlightSpace {
-  background: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
-  border: none !important;
+.markdown-reading-view.privacy-reading-view-enabled .privacy-reading-mask-blur {
+  filter: blur(var(--text-hider-blur-strength, 6px));
+}
+
+.privacy-status-indicator {
+  cursor: pointer;
+}
+
+/* Privacy mode: remove current-line rectangle artifacts */
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-activeLine,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-line.cm-activeLine,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-activeLineGutter {
+  background: transparent;
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+  outline: none;
+}
+
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-activeLine::before,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-activeLine::after,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-line.cm-activeLine::before,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-line.cm-activeLine::after,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-activeLineGutter::before,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-activeLineGutter::after {
+  content: none;
+  display: none;
+}
+
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-lineHighlight,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-highlightSpace {
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  border: none;
 }

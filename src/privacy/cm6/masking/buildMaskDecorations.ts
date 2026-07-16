@@ -2,7 +2,7 @@ import type { EditorView } from "@codemirror/view";
 import { Decoration } from "@codemirror/view";
 import { RangeSetBuilder } from "@codemirror/state";
 import type { TextHiderPluginSettings } from "../../../settings";
-import { computeRevealRanges, subtractRanges, mergeRanges, type Range } from "./ranges";
+import { computeCurrentLineRanges, computeRevealRanges, subtractRanges, mergeRanges, type Range } from "./ranges";
 import { isHeaderLine } from "./headers";
 
 export function buildMaskDecorations(
@@ -15,51 +15,38 @@ export function buildMaskDecorations(
 	const builder = new RangeSetBuilder<Decoration>();
 	const state = view.state;
 
-	// 1) Cursor reveal range
 	const cursorReveal = computeRevealRanges(state, settings.revealMode);
-
-	// 2) Selection reveal ranges (optional)
+	const currentLineReveal = settings.revealCurrentLine ? computeCurrentLineRanges(state) : [];
 	const selectionReveal: Range[] = settings.revealSelection
 		? state.selection.ranges
-				.filter((r) => !r.empty)
-				.map((r) => ({ from: Math.min(r.from, r.to), to: Math.max(r.from, r.to) }))
+				.filter((range) => !range.empty)
+				.map((range) => ({ from: Math.min(range.from, range.to), to: Math.max(range.from, range.to) }))
 		: [];
+	const revealRanges = mergeRanges([...cursorReveal, ...currentLineReveal, ...selectionReveal]);
 
-	const revealRanges = mergeRanges([...cursorReveal, ...selectionReveal]);
+	for (const visibleRange of view.visibleRanges) {
+		let pos = visibleRange.from;
 
-	// 3) Build masking per visible line
-	for (const vr of view.visibleRanges) {
-		let pos = vr.from;
-
-		while (pos <= vr.to) {
+		while (pos <= visibleRange.to) {
 			const line = state.doc.lineAt(pos);
-
-			if (line.from > vr.to) break;
+			if (line.from > visibleRange.to) break;
 
 			const excludeThisLine = settings.excludeHeaders && isHeaderLine(line.text);
-
 			if (!excludeThisLine) {
 				const lineRange: Range = { from: line.from, to: line.to };
-
 				const revealInLine = revealRanges
-					.filter((r) => r.to > lineRange.from && r.from < lineRange.to)
-					.map((r) => ({
-						from: Math.max(r.from, lineRange.from),
-						to: Math.min(r.to, lineRange.to),
+					.filter((range) => range.to > lineRange.from && range.from < lineRange.to)
+					.map((range) => ({
+						from: Math.max(range.from, lineRange.from),
+						to: Math.min(range.to, lineRange.to),
 					}));
-
 				const maskSegments = subtractRanges([lineRange], revealInLine);
+				const className = getMaskClass(settings.maskMode);
 
-				const cls =
-					settings.maskMode === "hide"
-						? "privacy-mask-hide"
-						: settings.maskMode === "password"
-							? "privacy-mask-password"
-							: "privacy-mask-blur";
-
-				for (const seg of maskSegments) {
-					if (seg.to <= seg.from) continue;
-					builder.add(seg.from, seg.to, Decoration.mark({ class: cls }));
+				for (const segment of maskSegments) {
+					if (segment.to > segment.from) {
+						builder.add(segment.from, segment.to, Decoration.mark({ class: className }));
+					}
 				}
 			}
 
@@ -69,4 +56,10 @@ export function buildMaskDecorations(
 	}
 
 	return builder.finish();
+}
+
+function getMaskClass(maskMode: TextHiderPluginSettings["maskMode"]): string {
+	if (maskMode === "hide") return "privacy-mask-hide";
+	if (maskMode === "password") return "privacy-mask-password";
+	return "privacy-mask-blur";
 }
