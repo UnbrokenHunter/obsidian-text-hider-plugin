@@ -3,22 +3,22 @@ import { MarkdownView } from "obsidian";
 import { Compartment, type Extension } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
 import { buildPrivacyExtension } from "./cm6/PrivacyExtension";
-import type { ApplyReason, SetEnabledOptions } from "./types";
 
-const READING_MASK_CLASS = "privacy-reading-mask";
-const READING_VIEW_CLASS = "privacy-reading-view-enabled";
-const READING_EXCLUDED_SELECTOR = "script, style, textarea, input, button, select, option, svg";
+type ApplyReason = "startup" | "command" | "settings-change";
 
 export class PrivacyController {
   private plugin: MyPlugin;
+
   private enabled: boolean;
+
   private compartment = new Compartment();
   private baseExtension: Extension;
-  private statusEl: HTMLElement;
 
   constructor(plugin: MyPlugin) {
     this.plugin = plugin;
     this.enabled = plugin.settings.enabled;
+
+    // Register ONE editor extension, and reconfigure it via a Compartment.
     this.baseExtension = this.compartment.of(
       buildPrivacyExtension({
         enabled: this.enabled,
@@ -27,25 +27,12 @@ export class PrivacyController {
     );
 
     this.plugin.registerEditorExtension(this.baseExtension);
-    this.statusEl = this.plugin.addStatusBarItem();
-    this.statusEl.addClass("privacy-status-indicator");
-    this.statusEl.setAttribute("role", "button");
-    this.statusEl.setAttribute("tabindex", "0");
-    this.plugin.registerDomEvent(this.statusEl, "click", () => this.toggleEnabled());
-    this.plugin.registerDomEvent(this.statusEl, "keydown", (event: KeyboardEvent) => {
-      if (event.key !== "Enter" && event.key !== " ") return;
-      event.preventDefault();
-      this.toggleEnabled();
-    });
 
-    this.plugin.registerMarkdownPostProcessor((element) => {
-      if (this.shouldMaskReadingView()) this.maskReadingContent(element);
-    });
-
-    const offActiveLeaf = this.plugin.app.workspace.on("active-leaf-change", () => this.apply("active-editor-change"));
-    const offLayout = this.plugin.app.workspace.on("layout-change", () => this.apply("active-editor-change"));
-    this.plugin.register(() => this.plugin.app.workspace.offref(offActiveLeaf));
-    this.plugin.register(() => this.plugin.app.workspace.offref(offLayout));
+    // Re-apply when switching panes/notes
+    const off1 = this.plugin.app.workspace.on("active-leaf-change", () => this.apply("settings-change"));
+    const off2 = this.plugin.app.workspace.on("layout-change", () => this.apply("settings-change"));
+    this.plugin.register(() => this.plugin.app.workspace.offref(off1));
+    this.plugin.register(() => this.plugin.app.workspace.offref(off2));
   }
 
   syncFromSettings(opts: { reason: ApplyReason }) {
@@ -57,152 +44,64 @@ export class PrivacyController {
     this.setEnabled(!this.enabled);
   }
 
-  setEnabled(next: boolean, opts: SetEnabledOptions = {}) {
+  setEnabled(next: boolean) {
     if (this.enabled === next) return;
 
     this.enabled = next;
-    if (opts.persist ?? true) {
-      this.plugin.settings.enabled = next;
-      void this.plugin.saveSettings();
-    }
+    this.plugin.settings.enabled = next;
+    void this.plugin.saveSettings();
 
-    this.apply(opts.reason ?? "command");
+    this.apply("command");
   }
 
   onSettingsChanged() {
-    this.enabled = this.plugin.settings.enabled;
+    // Settings tab saved something — push updated config
     this.apply("settings-change");
   }
 
-  destroy() {
-    this.syncReadingViews(false);
-    this.statusEl.remove();
-  }
-
   private apply(_reason: ApplyReason) {
-    const extension = buildPrivacyExtension({
+    // Reconfigure every active CM6 editor view
+    const ext = buildPrivacyExtension({
       enabled: this.enabled,
       settings: this.plugin.settings,
     });
-    const effect = this.compartment.reconfigure(extension);
 
-    for (const view of this.getAllMarkdownViews()) {
-      const editorView = this.getEditorView(view);
-      if (editorView) editorView.dispatch({ effects: effect });
-    }
+    const effect = this.compartment.reconfigure(ext);
 
-    this.syncReadingViews(this.shouldMaskReadingView());
-    this.updateStatusIndicator();
-  }
-
-  private shouldMaskReadingView(): boolean {
-    return this.enabled && this.plugin.settings.maskReadingView;
-  }
-
-  private syncReadingViews(mask: boolean) {
-    for (const view of this.getAllMarkdownViews()) {
-      if (view.getMode() !== "preview") continue;
-      this.syncReadingView(view.previewMode.containerEl, mask);
+    for (const view of this.getAllMarkdownEditorViews()) {
+      const cm = this.getEditorView(view);
+      if (!cm) continue;
+      cm.dispatch({ effects: effect });
     }
   }
 
-  private syncReadingView(container: HTMLElement, mask: boolean) {
-    container.toggleClass(READING_VIEW_CLASS, mask);
-
-    if (!mask) {
-      container.style.removeProperty("--text-hider-blur-strength");
-      this.unmaskReadingContent(container);
-      return;
-    }
-
-    container.style.setProperty("--text-hider-blur-strength", `${this.plugin.settings.blurStrength}px`);
-    this.updateReadingMaskClasses(container);
-    this.maskReadingContent(container);
-  }
-
-  private maskReadingContent(root: HTMLElement) {
-    const nodeFilter = root.ownerDocument.defaultView?.NodeFilter;
-    if (!nodeFilter) return;
-
-    const walker = root.ownerDocument.createTreeWalker(root, nodeFilter.SHOW_TEXT);
-    const textNodes: Text[] = [];
-
-    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-      if (node.nodeType === 3 && this.canMaskReadingText(node as Text)) textNodes.push(node as Text);
-    }
-
-    for (const textNode of textNodes) {
-      const parent = textNode.parentElement;
-      if (!parent) continue;
-
-      const span = root.ownerDocument.createElement("span");
-      span.className = `${READING_MASK_CLASS} ${this.getReadingMaskClass()}`;
-      parent.replaceChild(span, textNode);
-      span.appendChild(textNode);
-    }
-  }
-
-  private canMaskReadingText(textNode: Text): boolean {
-    if (!textNode.data.trim()) return false;
-
-    const parent = textNode.parentElement;
-    if (!parent) return false;
-    if (parent.closest(`.${READING_MASK_CLASS}`)) return false;
-    if (parent.closest(READING_EXCLUDED_SELECTOR)) return false;
-    if (this.plugin.settings.excludeHeaders && parent.closest("h1, h2, h3, h4, h5, h6")) return false;
-
-    return true;
-  }
-
-  private updateReadingMaskClasses(root: HTMLElement) {
-    for (const span of this.getReadingMaskSpans(root)) {
-      span.className = `${READING_MASK_CLASS} ${this.getReadingMaskClass()}`;
-    }
-  }
-
-  private getReadingMaskSpans(root: HTMLElement): HTMLElement[] {
-    return Array.from(root.querySelectorAll<HTMLElement>(`.${READING_MASK_CLASS}`));
-  }
-  private unmaskReadingContent(root: HTMLElement) {
-    for (const span of this.getReadingMaskSpans(root)) {
-      span.replaceWith(...Array.from(span.childNodes));
-    }
-    root.normalize();
-  }
-
-  private getReadingMaskClass(): string {
-    if (this.plugin.settings.maskMode === "hide") return "privacy-reading-mask-hide";
-    if (this.plugin.settings.maskMode === "password") return "privacy-reading-mask-password";
-    return "privacy-reading-mask-blur";
-  }
-
-  private updateStatusIndicator() {
-    const isVisible = this.plugin.settings.showStatusBar;
-    this.statusEl.hidden = !isVisible;
-    this.statusEl.toggleClass("is-active", this.enabled);
-    this.statusEl.setText(`Text Hider: ${this.enabled ? "On" : "Off"}`);
-    this.statusEl.setAttribute("aria-label", "Toggle privacy mode");
-    this.statusEl.setAttribute("title", `Text Hider is ${this.enabled ? "on" : "off"}. Select to toggle.`);
-  }
-
-  private *getAllMarkdownViews(): Iterable<MarkdownView> {
+  private *getAllMarkdownEditorViews(): Iterable<MarkdownView> {
     const leaves = this.plugin.app.workspace.getLeavesOfType("markdown");
     for (const leaf of leaves) {
-      if (leaf.view instanceof MarkdownView) yield leaf.view;
+      const view = leaf.view;
+      if (view instanceof MarkdownView) yield view;
     }
   }
 
-  private getEditorView(view: MarkdownView): EditorView | null {
-    return getEditorViewFromObsidianEditor(view.editor);
-  }
+  /**
+   * Obsidian's Editor is wrapped; in CM6 it usually exposes `.cm` as EditorView.
+   * This is the common plugin pattern.
+   */
+    private getEditorView(view: MarkdownView): EditorView | null {
+        return getEditorViewFromObsidianEditor(view.editor);
+    }
 }
 
 function getEditorViewFromObsidianEditor(editor: unknown): EditorView | null {
-  if (!editor || typeof editor !== "object") return null;
+    if (!editor || typeof editor !== "object") return null;
 
-  const maybeEditor = editor as { cm?: unknown };
-  const editorView = maybeEditor.cm;
-  return editorView && typeof editorView === "object" && "state" in editorView
-    ? (editorView as EditorView)
-    : null;
+    // editor is an object; check for a `cm` property
+    const maybe = editor as { cm?: unknown };
+    const cm = maybe.cm;
+
+    // basic sanity check: EditorView has a `state` object
+    if (cm && typeof cm === "object" && "state" in cm) {
+        return cm as EditorView;
+    }
+    return null;
 }

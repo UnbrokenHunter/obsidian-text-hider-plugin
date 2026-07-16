@@ -48,9 +48,6 @@ web_modules/
 # TypeScript cache
 *.tsbuildinfo
 
-# Bundled plugin output
-main.js
-
 # Optional npm cache directory
 .npm
 
