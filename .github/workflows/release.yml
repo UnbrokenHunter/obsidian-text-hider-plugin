@@ -27,6 +27,11 @@ jobs:
             - name: Build plugin
               run: npm run build
 
+            - name: Test and verify release artifacts
+              run: |
+                  npm test
+                  node scripts/verify-release.mjs "${GITHUB_REF#refs/tags/}"
+
             - name: Attest release assets
               uses: actions/attest@v4
               with:
@@ -43,5 +48,4 @@ jobs:
 
                   gh release create "$tag" \
                     --title="$tag" \
-                    --draft \
                     main.js manifest.json styles.css
