@@ -30,10 +30,15 @@ export function buildMaskDecorations(
 			const line = state.doc.lineAt(pos);
 			if (line.from > visibleRange.to) break;
 
+			const isCalloutLine = isCalloutBlockLine(state.doc, line.number);
+			const hideThisLine = settings.calloutMode === "hide" && isCalloutLine;
 			const excludeThisLine =
 				(settings.excludeHeaders && isHeaderLine(line.text)) ||
-				(settings.excludeCallouts && isCalloutBlockLine(state.doc, line.number));
-			if (!excludeThisLine) {
+				(settings.calloutMode === "exclude" && isCalloutLine);
+
+			if (hideThisLine) {
+				builder.add(line.from, line.from, Decoration.line({ class: "privacy-callout-hidden" }));
+			} else if (!excludeThisLine) {
 				const lineRange: Range = { from: line.from, to: line.to };
 				const revealInLine = revealRanges
 					.filter((range) => range.to > lineRange.from && range.from < lineRange.to)

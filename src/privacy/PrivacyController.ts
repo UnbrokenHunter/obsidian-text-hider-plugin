@@ -101,7 +101,7 @@ export class PrivacyController {
   }
 
   private shouldHideCallouts(): boolean {
-    return this.enabled && this.plugin.settings.hideCallouts;
+    return this.enabled && this.plugin.settings.calloutMode === "hide";
   }
 
   private syncReadingViews(mask: boolean, hideCallouts: boolean) {
@@ -156,7 +156,7 @@ export class PrivacyController {
     if (parent.closest(`.${READING_MASK_CLASS}`)) return false;
     if (parent.closest(READING_EXCLUDED_SELECTOR)) return false;
     if (this.plugin.settings.excludeHeaders && parent.closest("h1, h2, h3, h4, h5, h6")) return false;
-    if (this.plugin.settings.excludeCallouts && parent.closest(".callout")) return false;
+    if (this.plugin.settings.calloutMode === "exclude" && parent.closest(".callout")) return false;
 
     return true;
   }

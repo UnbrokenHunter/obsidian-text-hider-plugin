@@ -1,7 +1,9 @@
 import { Plugin } from "obsidian";
 import {
+  CalloutMode,
   clampRevealCount,
   DEFAULT_SETTINGS,
+  isCalloutMode,
   TextHiderPluginSettings,
   TextHiderSettingTab,
 } from "./settings";
@@ -49,12 +51,25 @@ export default class TextHiderPlugin extends Plugin {
   }
 
   async loadSettings() {
-    const saved = ((await this.loadData()) ?? {}) as Partial<TextHiderPluginSettings>;
+    const saved = ((await this.loadData()) ?? {}) as Partial<TextHiderPluginSettings> & {
+      excludeCallouts?: boolean;
+      hideCallouts?: boolean;
+    };
+    const { excludeCallouts, hideCallouts, ...currentSaved } = saved;
     const blurStrength = saved.blurStrength;
     const revealCount = saved.revealCount;
+    const calloutMode: CalloutMode = isCalloutMode(saved.calloutMode)
+      ? saved.calloutMode
+      : hideCallouts
+        ? "hide"
+        : excludeCallouts
+          ? "exclude"
+          : DEFAULT_SETTINGS.calloutMode;
+
     this.settings = {
       ...DEFAULT_SETTINGS,
-      ...saved,
+      ...currentSaved,
+      calloutMode,
       blurStrength:
         typeof blurStrength === "number" && Number.isFinite(blurStrength)
           ? Math.min(16, Math.max(1, blurStrength))

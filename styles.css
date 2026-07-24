@@ -21,27 +21,50 @@
 }
 
 /* Reading View */
-.markdown-reading-view.privacy-reading-view-enabled .privacy-reading-mask-hide {
+.privacy-reading-view-enabled .privacy-reading-mask-hide {
   color: transparent;
   -webkit-text-fill-color: transparent;
   text-shadow: none;
 }
 
-.markdown-reading-view.privacy-reading-view-enabled .privacy-reading-mask-password {
+.privacy-reading-view-enabled .privacy-reading-mask-password {
   -webkit-text-security: disc;
   font: inherit;
   font-variant-ligatures: none;
 }
 
-.markdown-reading-view.privacy-reading-view-enabled .privacy-reading-mask-blur {
+.privacy-reading-view-enabled .privacy-reading-mask-blur {
   filter: blur(var(--text-hider-blur-strength, 6px));
 }
-.markdown-reading-view.privacy-reading-callouts-hidden .callout {
-  display: none;
+.privacy-reading-callouts-hidden .callout,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-callout-mode-hide .callout {
+  display: none !important;
+}
+
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-callout-mode-mask.privacy-mask-mode-hide .callout,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-callout-mode-mask.privacy-mask-mode-hide .callout * {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-callout-mode-mask.privacy-mask-mode-password .callout,
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-callout-mode-mask.privacy-mask-mode-password .callout * {
+  -webkit-text-security: disc;
+  font: inherit;
+  font-variant-ligatures: none;
+}
+
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-callout-mode-mask.privacy-mask-mode-blur .callout {
+  filter: blur(var(--text-hider-blur-strength, 6px));
 }
 
 .privacy-status-indicator {
   cursor: pointer;
+}
+
+.text-hider-setting-hidden {
+  display: none;
 }
 
 /* Privacy mode: remove current-line rectangle artifacts */
@@ -71,4 +94,7 @@
   box-shadow: none;
   outline: none;
   border: none;
+}
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-line.privacy-callout-hidden {
+  display: none;
 }

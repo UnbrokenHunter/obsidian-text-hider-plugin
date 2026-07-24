@@ -3,6 +3,7 @@ import MyPlugin from "./main";
 
 export type MaskMode = "hide" | "password" | "blur";
 export type RevealMode = "word" | "letter" | "sentence" | "line";
+export type CalloutMode = "mask" | "exclude" | "hide";
 export const MIN_REVEAL_COUNT = 1;
 export const MAX_REVEAL_COUNT = 100;
 
@@ -25,17 +26,14 @@ export interface TextHiderPluginSettings {
 	/** Keep Markdown headers visible (#, ##, etc.) */
 	excludeHeaders: boolean;
 
-	/** Keep Markdown callouts visible */
-	excludeCallouts: boolean;
+	/** How privacy mode treats Markdown callouts */
+	calloutMode: CalloutMode;
 
 	/** If enabled, selection becomes visible while selected */
 	revealSelection: boolean;
 
 	/** Apply masking to rendered Markdown in Reading View */
 	maskReadingView: boolean;
-
-	/** Hide rendered callout boxes while privacy mode is enabled */
-	hideCallouts: boolean;
 
 	/** Show the current privacy mode state in the status bar */
 	showStatusBar: boolean;
@@ -48,10 +46,9 @@ export const DEFAULT_SETTINGS: TextHiderPluginSettings = {
 	revealCount: 1,
 	blurStrength: 6,
 	excludeHeaders: true,
-	excludeCallouts: false,
+	calloutMode: "mask",
 	revealSelection: true,
 	maskReadingView: true,
-	hideCallouts: false,
 	showStatusBar: true,
 };
 
@@ -80,6 +77,11 @@ export class TextHiderSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl).setName("Masking & reveal").setHeading();
 
+		let blurStrengthSetting: Setting | null = null;
+		const updateBlurStrengthVisibility = () => {
+			blurStrengthSetting?.settingEl.toggleClass("text-hider-setting-hidden", this.plugin.settings.maskMode !== "blur");
+		};
+
 		new Setting(containerEl)
 			.setName("Mask mode")
 			.setDesc("How hidden text is shown. Hide is cleanest, blur is softer, and password can vary by theme.")
@@ -90,12 +92,13 @@ export class TextHiderSettingTab extends PluginSettingTab {
 				dropdown.setValue(this.plugin.settings.maskMode);
 				dropdown.onChange(async (value) => {
 					this.plugin.settings.maskMode = value as MaskMode;
+					updateBlurStrengthVisibility();
 					await this.plugin.saveSettings();
 					this.plugin.notifySettingsChanged();
 				});
 			});
 
-		new Setting(containerEl)
+		blurStrengthSetting = new Setting(containerEl)
 			.setName("Blur strength")
 			.setDesc("How strongly text is blurred when blur mode is selected.")
 			.addSlider((slider) =>
@@ -109,6 +112,7 @@ export class TextHiderSettingTab extends PluginSettingTab {
 						this.plugin.notifySettingsChanged();
 					})
 			);
+		updateBlurStrengthVisibility();
 
 		new Setting(containerEl)
 			.setName("Reveal mode")
@@ -128,7 +132,7 @@ export class TextHiderSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Reveal amount")
-			.setDesc("How many adjacent characters, words, sentences, or lines to reveal (1–100).")
+			.setDesc("How many adjacent characters, words, sentences, or lines to reveal (1-100).")
 			.addText((text) =>
 				text
 					.setValue(String(this.plugin.settings.revealCount))
@@ -157,17 +161,6 @@ export class TextHiderSettingTab extends PluginSettingTab {
 		new Setting(containerEl).setName("Exceptions & behavior").setHeading();
 
 		new Setting(containerEl)
-			.setName("Exclude callouts")
-			.setDesc("Keep Markdown callouts readable.")
-			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.excludeCallouts).onChange(async (value) => {
-					this.plugin.settings.excludeCallouts = value;
-					await this.plugin.saveSettings();
-					this.plugin.notifySettingsChanged();
-				})
-			);
-
-		new Setting(containerEl)
 			.setName("Exclude headers")
 			.setDesc("Keep Markdown headers (#, ##, ###) visible.")
 			.addToggle((toggle) =>
@@ -177,6 +170,21 @@ export class TextHiderSettingTab extends PluginSettingTab {
 					this.plugin.notifySettingsChanged();
 				})
 			);
+
+		new Setting(containerEl)
+			.setName("Callout handling")
+			.setDesc("Choose how privacy mode treats Markdown callouts.")
+			.addDropdown((dropdown) => {
+				dropdown.addOption("mask", "Mask text");
+				dropdown.addOption("exclude", "Keep visible");
+				dropdown.addOption("hide", "Hide completely");
+				dropdown.setValue(this.plugin.settings.calloutMode);
+				dropdown.onChange(async (value) => {
+					this.plugin.settings.calloutMode = value as CalloutMode;
+					await this.plugin.saveSettings();
+					this.plugin.notifySettingsChanged();
+				});
+			});
 
 		new Setting(containerEl).setName("Views & status").setHeading();
 
@@ -192,16 +200,6 @@ export class TextHiderSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Hide callouts")
-			.setDesc("Hide callout boxes in reading view while privacy mode is on.")
-			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.hideCallouts).onChange(async (value) => {
-					this.plugin.settings.hideCallouts = value;
-					await this.plugin.saveSettings();
-					this.plugin.notifySettingsChanged();
-				})
-			);
-		new Setting(containerEl)
 			.setName("Show status bar indicator")
 			.setDesc("Show the current privacy mode state in the status bar. Select it to toggle privacy mode.")
 			.addToggle((toggle) =>
@@ -216,4 +214,8 @@ export class TextHiderSettingTab extends PluginSettingTab {
 
 export function clampRevealCount(value: number): number {
 	return Math.min(MAX_REVEAL_COUNT, Math.max(MIN_REVEAL_COUNT, value));
+}
+
+export function isCalloutMode(value: unknown): value is CalloutMode {
+	return value === "mask" || value === "exclude" || value === "hide";
 }
