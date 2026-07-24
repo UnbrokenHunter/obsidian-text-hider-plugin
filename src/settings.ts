@@ -28,9 +28,6 @@ export interface TextHiderPluginSettings {
 	/** If enabled, selection becomes visible while selected */
 	revealSelection: boolean;
 
-	/** If enabled, the line containing each cursor stays readable */
-	revealCurrentLine: boolean;
-
 	/** Apply masking to rendered Markdown in Reading View */
 	maskReadingView: boolean;
 
@@ -46,7 +43,6 @@ export const DEFAULT_SETTINGS: TextHiderPluginSettings = {
 	blurStrength: 6,
 	excludeHeaders: true,
 	revealSelection: true,
-	revealCurrentLine: false,
 	maskReadingView: true,
 	showStatusBar: true,
 };
@@ -158,17 +154,6 @@ export class TextHiderSettingTab extends PluginSettingTab {
 			.addToggle((toggle) =>
 				toggle.setValue(this.plugin.settings.revealSelection).onChange(async (value) => {
 					this.plugin.settings.revealSelection = value;
-					await this.plugin.saveSettings();
-					this.plugin.notifySettingsChanged();
-				})
-			);
-
-		new Setting(containerEl)
-			.setName("Reveal current line")
-			.setDesc("Keep the full line containing each cursor readable.")
-			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.revealCurrentLine).onChange(async (value) => {
-					this.plugin.settings.revealCurrentLine = value;
 					await this.plugin.saveSettings();
 					this.plugin.notifySettingsChanged();
 				})

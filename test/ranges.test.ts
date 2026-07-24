@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { EditorSelection, EditorState } from "@codemirror/state";
 import {
-  computeCurrentLineRanges,
   computeRevealRanges,
   mergeRanges,
   subtractRanges,
@@ -33,7 +32,7 @@ test("word reveal includes accented letters and curly apostrophes", () => {
   assert.deepEqual(computeRevealRanges(apostropheState, "word"), [{ from: 0, to: 5 }]);
 });
 
-test("every cursor reveals its own word and line", () => {
+test("every cursor reveals its own word", () => {
   const state = EditorState.create({
     doc: "first\nsecond",
     extensions: [EditorState.allowMultipleSelections.of(true)],
@@ -41,10 +40,6 @@ test("every cursor reveals its own word and line", () => {
   });
 
   assert.deepEqual(computeRevealRanges(state, "word"), [
-    { from: 0, to: 5 },
-    { from: 6, to: 12 },
-  ]);
-  assert.deepEqual(computeCurrentLineRanges(state), [
     { from: 0, to: 5 },
     { from: 6, to: 12 },
   ]);

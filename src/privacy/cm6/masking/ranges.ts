@@ -53,14 +53,6 @@ export function computeRevealRanges(
   return mergeRanges(state.selection.ranges.flatMap((range) => computeRevealRange(state, range.head, revealMode, count)));
 }
 
-export function computeCurrentLineRanges(state: EditorState): Range[] {
-  return mergeRanges(
-    state.selection.ranges.map((range) => {
-      const line = state.doc.lineAt(range.head);
-      return { from: line.from, to: line.to };
-    })
-  );
-}
 
 function computeRevealRange(
   state: EditorState,

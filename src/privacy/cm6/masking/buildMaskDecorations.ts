@@ -2,7 +2,7 @@ import type { EditorView } from "@codemirror/view";
 import { Decoration } from "@codemirror/view";
 import { RangeSetBuilder } from "@codemirror/state";
 import type { TextHiderPluginSettings } from "../../../settings";
-import { computeCurrentLineRanges, computeRevealRanges, subtractRanges, mergeRanges, type Range } from "./ranges";
+import { computeRevealRanges, subtractRanges, mergeRanges, type Range } from "./ranges";
 import { isHeaderLine } from "./headers";
 
 export function buildMaskDecorations(
@@ -16,13 +16,12 @@ export function buildMaskDecorations(
 	const state = view.state;
 
 	const cursorReveal = computeRevealRanges(state, settings.revealMode, settings.revealCount);
-	const currentLineReveal = settings.revealCurrentLine ? computeCurrentLineRanges(state) : [];
 	const selectionReveal: Range[] = settings.revealSelection
 		? state.selection.ranges
 				.filter((range) => !range.empty)
 				.map((range) => ({ from: Math.min(range.from, range.to), to: Math.max(range.from, range.to) }))
 		: [];
-	const revealRanges = mergeRanges([...cursorReveal, ...currentLineReveal, ...selectionReveal]);
+	const revealRanges = mergeRanges([...cursorReveal, ...selectionReveal]);
 
 	for (const visibleRange of view.visibleRanges) {
 		let pos = visibleRange.from;
