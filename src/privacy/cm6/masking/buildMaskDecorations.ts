@@ -15,7 +15,7 @@ export function buildMaskDecorations(
 	const builder = new RangeSetBuilder<Decoration>();
 	const state = view.state;
 
-	const cursorReveal = computeRevealRanges(state, settings.revealMode);
+	const cursorReveal = computeRevealRanges(state, settings.revealMode, settings.revealCount);
 	const currentLineReveal = settings.revealCurrentLine ? computeCurrentLineRanges(state) : [];
 	const selectionReveal: Range[] = settings.revealSelection
 		? state.selection.ranges

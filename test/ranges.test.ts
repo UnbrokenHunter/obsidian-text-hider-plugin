@@ -54,3 +54,25 @@ test("letter reveal uses the preceding character at document end", () => {
   const state = EditorState.create({ doc: "note", selection: { anchor: 4 } });
   assert.deepEqual(computeRevealRanges(state, "letter"), [{ from: 3, to: 4 }]);
 });
+
+test("reveal amount keeps the focused word and reveals adjacent words", () => {
+  const state = EditorState.create({ doc: "one two three four", selection: { anchor: 5 } });
+  assert.deepEqual(computeRevealRanges(state, "word", 3), [{ from: 4, to: 18 }]);
+});
+
+test("sentence reveal keeps the focused sentence and supports multiple sentences", () => {
+  const doc = "First sentence. Second sentence! Third sentence?";
+  const state = EditorState.create({ doc, selection: { anchor: doc.indexOf("Second") + 2 } });
+
+  assert.deepEqual(computeRevealRanges(state, "sentence"), [
+    { from: doc.indexOf("Second"), to: doc.indexOf("!") + 1 },
+  ]);
+  assert.deepEqual(computeRevealRanges(state, "sentence", 2), [
+    { from: doc.indexOf("Second"), to: doc.length },
+  ]);
+});
+
+test("character reveal amount moves backward at document end", () => {
+  const state = EditorState.create({ doc: "note", selection: { anchor: 4 } });
+  assert.deepEqual(computeRevealRanges(state, "letter", 3), [{ from: 1, to: 4 }]);
+});

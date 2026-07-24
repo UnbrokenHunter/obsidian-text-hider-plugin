@@ -1,5 +1,10 @@
 import { Plugin } from "obsidian";
-import { DEFAULT_SETTINGS, TextHiderPluginSettings, TextHiderSettingTab } from "./settings";
+import {
+  clampRevealCount,
+  DEFAULT_SETTINGS,
+  TextHiderPluginSettings,
+  TextHiderSettingTab,
+} from "./settings";
 import { PrivacyController } from "./privacy/PrivacyController";
 
 export default class TextHiderPlugin extends Plugin {
@@ -46,6 +51,7 @@ export default class TextHiderPlugin extends Plugin {
   async loadSettings() {
     const saved = (await this.loadData()) as Partial<TextHiderPluginSettings>;
     const blurStrength = saved.blurStrength;
+    const revealCount = saved.revealCount;
     this.settings = {
       ...DEFAULT_SETTINGS,
       ...saved,
@@ -53,6 +59,10 @@ export default class TextHiderPlugin extends Plugin {
         typeof blurStrength === "number" && Number.isFinite(blurStrength)
           ? Math.min(16, Math.max(1, blurStrength))
           : DEFAULT_SETTINGS.blurStrength,
+      revealCount:
+        typeof revealCount === "number" && Number.isFinite(revealCount)
+          ? clampRevealCount(Math.round(revealCount))
+          : DEFAULT_SETTINGS.revealCount,
     };
   }
 

@@ -1,4 +1,5 @@
 import type { EditorState } from "@codemirror/state";
+import type { RevealMode } from "../../../settings";
 
 export type Range = { from: number; to: number };
 
@@ -45,9 +46,11 @@ export function subtractRanges(base: Range[], subtract: Range[]): Range[] {
 
 export function computeRevealRanges(
   state: EditorState,
-  revealMode: "word" | "letter"
+  revealMode: RevealMode,
+  revealCount = 1
 ): Range[] {
-  return mergeRanges(state.selection.ranges.flatMap((range) => computeRevealRange(state, range.head, revealMode)));
+  const count = Math.max(1, Math.floor(revealCount));
+  return mergeRanges(state.selection.ranges.flatMap((range) => computeRevealRange(state, range.head, revealMode, count)));
 }
 
 export function computeCurrentLineRanges(state: EditorState): Range[] {
@@ -62,26 +65,86 @@ export function computeCurrentLineRanges(state: EditorState): Range[] {
 function computeRevealRange(
   state: EditorState,
   pos: number,
-  revealMode: "word" | "letter"
+  revealMode: RevealMode,
+  revealCount: number
 ): Range[] {
   if (revealMode === "letter") {
-    if (pos < state.doc.length) return [{ from: pos, to: pos + 1 }];
-    if (pos > 0) return [{ from: pos - 1, to: pos }];
-    return [];
+    return getRangeWindow(getCharacterRanges(state.doc.toString()), pos, revealCount);
   }
 
-  const line = state.doc.lineAt(pos);
-  const index = pos - line.from;
+  const text = state.doc.toString();
+  const units = revealMode === "sentence" ? getSentenceRanges(text) : getWordRanges(text);
+  return getRangeWindow(units, pos, revealCount);
+}
 
-  let left = index;
-  while (left > 0 && isWordChar(line.text.charAt(left - 1))) left--;
+function getRangeWindow(units: Range[], pos: number, count: number): Range[] {
+  const focusedIndex = units.findIndex((unit) => pos >= unit.from && pos < unit.to);
+  const index = focusedIndex >= 0 ? focusedIndex : pos === units[units.length - 1]?.to ? units.length - 1 : -1;
+  if (index < 0) return [];
 
-  let right = index;
-  while (right < line.text.length && isWordChar(line.text.charAt(right))) right++;
+  const end = Math.min(units.length, index + count);
+  const start = Math.max(0, end - count);
+  const first = units[start];
+  const last = units[end - 1];
+  return first && last ? [{ from: first.from, to: last.to }] : [];
+}
 
-  if (right <= left) return [];
+function getCharacterRanges(text: string): Range[] {
+  return Array.from({ length: text.length }, (_, index) => ({ from: index, to: index + 1 }));
+}
 
-  return [{ from: line.from + left, to: line.from + right }];
+function getWordRanges(text: string): Range[] {
+  const ranges: Range[] = [];
+  let start = -1;
+
+  for (let index = 0; index <= text.length; index++) {
+    if (index < text.length && isWordChar(text.charAt(index))) {
+      if (start < 0) start = index;
+      continue;
+    }
+
+    if (start >= 0) {
+      ranges.push({ from: start, to: index });
+      start = -1;
+    }
+  }
+
+  return ranges;
+}
+
+function getSentenceRanges(text: string): Range[] {
+  const ranges: Range[] = [];
+  let start = findNextNonWhitespace(text, 0);
+
+  while (start >= 0) {
+    let end = start;
+    while (end < text.length && !isSentenceEnd(text.charAt(end))) end++;
+
+    if (end < text.length) {
+      end++;
+      while (end < text.length && isClosingPunctuation(text.charAt(end))) end++;
+    }
+
+    ranges.push({ from: start, to: end });
+    start = findNextNonWhitespace(text, end);
+  }
+
+  return ranges;
+}
+
+function findNextNonWhitespace(text: string, from: number): number {
+  for (let index = from; index < text.length; index++) {
+    if (!/\s/u.test(text.charAt(index))) return index;
+  }
+  return -1;
+}
+
+function isSentenceEnd(character: string): boolean {
+  return /[.!?\u2026]/u.test(character);
+}
+
+function isClosingPunctuation(character: string): boolean {
+  return /["'\u2019\u201d)\]}]/u.test(character);
 }
 
 function isWordChar(character: string): boolean {

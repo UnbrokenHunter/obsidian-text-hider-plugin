@@ -2,7 +2,9 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import MyPlugin from "./main";
 
 export type MaskMode = "hide" | "password" | "blur";
-export type RevealMode = "word" | "letter";
+export type RevealMode = "word" | "letter" | "sentence";
+export const MIN_REVEAL_COUNT = 1;
+export const MAX_REVEAL_COUNT = 100;
 
 export interface TextHiderPluginSettings {
 	/** Persisted global default state */
@@ -13,6 +15,9 @@ export interface TextHiderPluginSettings {
 
 	/** What to reveal at the cursor */
 	revealMode: RevealMode;
+
+	/** How many adjacent characters, words, or sentences to reveal */
+	revealCount: number;
 
 	/** Blur radius in pixels when blur masking is selected */
 	blurStrength: number;
@@ -37,6 +42,7 @@ export const DEFAULT_SETTINGS: TextHiderPluginSettings = {
 	enabled: false,
 	maskMode: "blur",
 	revealMode: "word",
+	revealCount: 1,
 	blurStrength: 6,
 	excludeHeaders: true,
 	revealSelection: true,
@@ -104,8 +110,9 @@ export class TextHiderSettingTab extends PluginSettingTab {
 			.setName("Reveal mode")
 			.setDesc("What stays readable at each cursor.")
 			.addDropdown((dropdown) => {
-				dropdown.addOption("word", "Current word");
-				dropdown.addOption("letter", "Current letter");
+				dropdown.addOption("word", "Words");
+				dropdown.addOption("letter", "Characters");
+				dropdown.addOption("sentence", "Sentences");
 				dropdown.setValue(this.plugin.settings.revealMode);
 				dropdown.onChange(async (value) => {
 					this.plugin.settings.revealMode = value as RevealMode;
@@ -113,6 +120,23 @@ export class TextHiderSettingTab extends PluginSettingTab {
 					this.plugin.notifySettingsChanged();
 				});
 			});
+
+		new Setting(containerEl)
+			.setName("Reveal amount")
+			.setDesc("How many adjacent characters, words, or sentences to reveal (1–100).")
+			.addText((text) =>
+				text
+					.setValue(String(this.plugin.settings.revealCount))
+					.setPlaceholder("1")
+					.onChange(async (value) => {
+						const count = Number(value);
+						if (!Number.isInteger(count)) return;
+
+						this.plugin.settings.revealCount = clampRevealCount(count);
+						await this.plugin.saveSettings();
+						this.plugin.notifySettingsChanged();
+					})
+			);
 
 		new Setting(containerEl).setName("Exceptions & behavior").setHeading();
 
@@ -173,4 +197,8 @@ export class TextHiderSettingTab extends PluginSettingTab {
 				})
 			);
 	}
+}
+
+export function clampRevealCount(value: number): number {
+	return Math.min(MAX_REVEAL_COUNT, Math.max(MIN_REVEAL_COUNT, value));
 }
