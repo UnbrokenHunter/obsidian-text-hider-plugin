@@ -23,8 +23,8 @@ export interface TextHiderPluginSettings {
 	/** Blur radius in pixels when blur masking is selected */
 	blurStrength: number;
 
-	/** Keep Markdown headers visible (#, ##, etc.) */
-	excludeHeaders: boolean;
+	/** How privacy mode treats Markdown headers */
+	headerMode: CalloutMode;
 
 	/** How privacy mode treats Markdown callouts */
 	calloutMode: CalloutMode;
@@ -48,7 +48,7 @@ export const DEFAULT_SETTINGS: TextHiderPluginSettings = {
 	revealMode: "word",
 	revealCount: 1,
 	blurStrength: 6,
-	excludeHeaders: true,
+	headerMode: "exclude",
 	calloutMode: "mask",
 	titleMode: "mask",
 	revealSelection: true,
@@ -163,17 +163,21 @@ export class TextHiderSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl).setName("Exceptions & behavior").setHeading();
-
 		new Setting(containerEl)
-			.setName("Exclude headers")
-			.setDesc("Keep Markdown headers (#, ##, ###) visible.")
-			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.excludeHeaders).onChange(async (value) => {
-					this.plugin.settings.excludeHeaders = value;
+			.setName("Header handling")
+			.setDesc("Choose how privacy mode treats Markdown headers.")
+			.addDropdown((dropdown) => {
+				dropdown.addOption("mask", "Mask text");
+				dropdown.addOption("exclude", "Keep visible");
+				dropdown.addOption("hide", "Hide completely");
+				dropdown.setValue(this.plugin.settings.headerMode);
+				dropdown.onChange(async (value) => {
+					this.plugin.settings.headerMode = value as CalloutMode;
 					await this.plugin.saveSettings();
 					this.plugin.notifySettingsChanged();
-				})
-			);
+				});
+			});
+
 
 		new Setting(containerEl)
 			.setName("Callout handling")

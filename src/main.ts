@@ -52,10 +52,11 @@ export default class TextHiderPlugin extends Plugin {
 
   async loadSettings() {
     const saved = ((await this.loadData()) ?? {}) as Partial<TextHiderPluginSettings> & {
+      excludeHeaders?: boolean;
       excludeCallouts?: boolean;
       hideCallouts?: boolean;
     };
-    const { excludeCallouts, hideCallouts, ...currentSaved } = saved;
+    const { excludeHeaders, excludeCallouts, hideCallouts, ...currentSaved } = saved;
     const blurStrength = saved.blurStrength;
     const revealCount = saved.revealCount;
     const calloutMode: CalloutMode = isCalloutMode(saved.calloutMode)
@@ -65,13 +66,19 @@ export default class TextHiderPlugin extends Plugin {
         : excludeCallouts
           ? "exclude"
           : DEFAULT_SETTINGS.calloutMode;
-    const titleMode: CalloutMode = isCalloutMode(saved.titleMode) ? saved.titleMode : DEFAULT_SETTINGS.titleMode;
+const titleMode: CalloutMode = isCalloutMode(saved.titleMode) ? saved.titleMode : DEFAULT_SETTINGS.titleMode;
+    const headerMode: CalloutMode = isCalloutMode(saved.headerMode)
+      ? saved.headerMode
+      : excludeHeaders === false
+        ? "mask"
+        : DEFAULT_SETTINGS.headerMode;
 
     this.settings = {
       ...DEFAULT_SETTINGS,
       ...currentSaved,
       calloutMode,
       titleMode,
+      headerMode,
       blurStrength:
         typeof blurStrength === "number" && Number.isFinite(blurStrength)
           ? Math.min(16, Math.max(1, blurStrength))

@@ -119,3 +119,7 @@
 .text-hider-note-title-masked.text-hider-note-title-mask-blur .inline-title {
   filter: blur(var(--text-hider-blur-strength, 6px));
 }
+.privacy-reading-headers-hidden :is(h1, h2, h3, h4, h5, h6),
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-header-mode-hide :is(h1, h2, h3, h4, h5, h6) {
+  display: none !important;
+}

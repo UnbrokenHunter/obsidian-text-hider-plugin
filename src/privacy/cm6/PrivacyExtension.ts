@@ -8,7 +8,7 @@ export function buildPrivacyExtension(args: { enabled: boolean; settings: TextHi
 
   const editorAttrs = EditorView.editorAttributes.of({
     class: enabled
-      ? `privacy-mode-enabled privacy-mask-mode-${settings.maskMode} privacy-callout-mode-${settings.calloutMode}`
+      ? `privacy-mode-enabled privacy-mask-mode-${settings.maskMode} privacy-callout-mode-${settings.calloutMode} privacy-header-mode-${settings.headerMode}`
       : "",
     style: `--text-hider-blur-strength: ${settings.blurStrength}px;`,
   });

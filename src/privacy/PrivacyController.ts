@@ -8,6 +8,7 @@ import type { ApplyReason, SetEnabledOptions } from "./types";
 const READING_MASK_CLASS = "privacy-reading-mask";
 const READING_VIEW_CLASS = "privacy-reading-view-enabled";
 const READING_HIDE_CALLOUTS_CLASS = "privacy-reading-callouts-hidden";
+const READING_HIDE_HEADERS_CLASS = "privacy-reading-headers-hidden";
 const READING_EXCLUDED_SELECTOR = "script, style, textarea, input, button, select, option, svg";
 
 export class PrivacyController {
@@ -76,7 +77,7 @@ export class PrivacyController {
   }
 
   destroy() {
-    this.syncReadingViews(false, false);
+    this.syncReadingViews(false, false, false);
     this.syncNoteTitles(false);
     this.statusEl.remove();
   }
@@ -93,7 +94,7 @@ export class PrivacyController {
       if (editorView) editorView.dispatch({ effects: effect });
     }
 
-    this.syncReadingViews(this.shouldMaskReadingView(), this.shouldHideCallouts());
+    this.syncReadingViews(this.shouldMaskReadingView(), this.shouldHideCallouts(), this.shouldHideHeaders());
     this.syncNoteTitles();
     this.updateStatusIndicator();
   }
@@ -104,6 +105,10 @@ export class PrivacyController {
 
   private shouldHideCallouts(): boolean {
     return this.enabled && this.plugin.settings.calloutMode === "hide";
+  }
+
+  private shouldHideHeaders(): boolean {
+    return this.enabled && this.plugin.settings.headerMode === "hide";
   }
   private syncNoteTitles(enabled = this.enabled) {
     const maskTitle = enabled && this.plugin.settings.titleMode === "mask";
@@ -119,16 +124,17 @@ export class PrivacyController {
     }
   }
 
-  private syncReadingViews(mask: boolean, hideCallouts: boolean) {
+  private syncReadingViews(mask: boolean, hideCallouts: boolean, hideHeaders: boolean) {
     for (const view of this.getAllMarkdownViews()) {
       if (view.getMode() !== "preview") continue;
-      this.syncReadingView(view.previewMode.containerEl, mask, hideCallouts);
+      this.syncReadingView(view.previewMode.containerEl, mask, hideCallouts, hideHeaders);
     }
   }
 
-  private syncReadingView(container: HTMLElement, mask: boolean, hideCallouts: boolean) {
+  private syncReadingView(container: HTMLElement, mask: boolean, hideCallouts: boolean, hideHeaders: boolean) {
     container.toggleClass(READING_VIEW_CLASS, mask);
     container.toggleClass(READING_HIDE_CALLOUTS_CLASS, hideCallouts);
+    container.toggleClass(READING_HIDE_HEADERS_CLASS, hideHeaders);
 
     if (!mask) {
       container.style.removeProperty("--text-hider-blur-strength");
@@ -170,7 +176,7 @@ export class PrivacyController {
     if (!parent) return false;
     if (parent.closest(`.${READING_MASK_CLASS}`)) return false;
     if (parent.closest(READING_EXCLUDED_SELECTOR)) return false;
-    if (this.plugin.settings.excludeHeaders && parent.closest("h1, h2, h3, h4, h5, h6")) return false;
+    if (this.plugin.settings.headerMode === "exclude" && parent.closest("h1, h2, h3, h4, h5, h6")) return false;
     if (this.plugin.settings.calloutMode === "exclude" && parent.closest(".callout")) return false;
 
     return true;

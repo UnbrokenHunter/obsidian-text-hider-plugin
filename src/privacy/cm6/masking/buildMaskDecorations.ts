@@ -31,9 +31,12 @@ export function buildMaskDecorations(
 			if (line.from > visibleRange.to) break;
 
 			const isCalloutLine = isCalloutBlockLine(state.doc, line.number);
-			const hideThisLine = settings.calloutMode === "hide" && isCalloutLine;
+			const isHeader = isHeaderLine(line.text);
+			const hideThisLine =
+				(settings.calloutMode === "hide" && isCalloutLine) ||
+				(settings.headerMode === "hide" && isHeader);
 			const excludeThisLine =
-				(settings.excludeHeaders && isHeaderLine(line.text)) ||
+				(settings.headerMode === "exclude" && isHeader) ||
 				(settings.calloutMode === "exclude" && isCalloutLine);
 
 			if (hideThisLine) {
