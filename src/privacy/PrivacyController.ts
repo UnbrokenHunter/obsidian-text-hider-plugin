@@ -17,6 +17,7 @@ export class PrivacyController {
   private compartment = new Compartment();
   private baseExtension: Extension;
   private statusEl: HTMLElement;
+  private screenTintEl: HTMLElement;
 
   constructor(plugin: MyPlugin) {
     this.plugin = plugin;
@@ -29,6 +30,9 @@ export class PrivacyController {
     );
 
     this.plugin.registerEditorExtension(this.baseExtension);
+    this.screenTintEl = document.createElement("div");
+    this.screenTintEl.className = "text-hider-screen-tint";
+    document.body.appendChild(this.screenTintEl);
     this.statusEl = this.plugin.addStatusBarItem();
     this.statusEl.addClass("privacy-status-indicator");
     this.statusEl.setAttribute("role", "button");
@@ -76,9 +80,14 @@ export class PrivacyController {
     this.apply("settings-change");
   }
 
+  updateScreenTint() {
+    this.syncScreenTint();
+  }
+
   destroy() {
     this.syncReadingViews(false, false, false);
     this.syncNoteTitles(false);
+    this.screenTintEl.remove();
     this.statusEl.remove();
   }
 
@@ -96,6 +105,7 @@ export class PrivacyController {
 
     this.syncReadingViews(this.shouldMaskReadingView(), this.shouldHideCallouts(), this.shouldHideHeaders());
     this.syncNoteTitles();
+    this.syncScreenTint();
     this.updateStatusIndicator();
   }
 
@@ -124,6 +134,18 @@ export class PrivacyController {
     }
   }
 
+  private syncScreenTint() {
+    const { screenTintBrightness, screenTintEnabled, screenTintHue, screenTintIntensity } = this.plugin.settings;
+    const active = this.enabled && screenTintEnabled;
+    const brightnessChannel = screenTintBrightness < 0 ? 0 : 255;
+    const brightnessOpacity = Math.min(0.45, Math.abs(screenTintBrightness) / 100);
+    const tintOpacity = Math.min(0.25, screenTintIntensity / 100);
+    const tintLayer = `hsla(${screenTintHue}, 100%, 50%, ${tintOpacity})`;
+    const brightnessLayer = `rgba(${brightnessChannel}, ${brightnessChannel}, ${brightnessChannel}, ${brightnessOpacity})`;
+
+    this.screenTintEl.toggleClass("is-active", active);
+    this.screenTintEl.style.background = `linear-gradient(${tintLayer}, ${tintLayer}), linear-gradient(${brightnessLayer}, ${brightnessLayer})`;
+  }
   private syncReadingViews(mask: boolean, hideCallouts: boolean, hideHeaders: boolean) {
     for (const view of this.getAllMarkdownViews()) {
       if (view.getMode() !== "preview") continue;

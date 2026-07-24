@@ -6,6 +6,12 @@ export type RevealMode = "word" | "letter" | "sentence" | "line";
 export type CalloutMode = "mask" | "exclude" | "hide";
 export const MIN_REVEAL_COUNT = 1;
 export const MAX_REVEAL_COUNT = 100;
+export const MIN_SCREEN_TINT_BRIGHTNESS = -75;
+export const MAX_SCREEN_TINT_BRIGHTNESS = 35;
+export const MIN_SCREEN_TINT_HUE = 0;
+export const MAX_SCREEN_TINT_HUE = 360;
+export const MIN_SCREEN_TINT_INTENSITY = 0;
+export const MAX_SCREEN_TINT_INTENSITY = 35;
 
 export interface TextHiderPluginSettings {
 	/** Persisted global default state */
@@ -35,8 +41,14 @@ export interface TextHiderPluginSettings {
 	/** If enabled, selection becomes visible while selected */
 	revealSelection: boolean;
 
-	/** Apply masking to rendered Markdown in Reading View */
+/** Apply masking to rendered Markdown in Reading View */
 	maskReadingView: boolean;
+
+	/** Apply a color tint over the Obsidian workspace */
+	screenTintEnabled: boolean;
+	screenTintBrightness: number;
+	screenTintHue: number;
+	screenTintIntensity: number;
 
 	/** Show the current privacy mode state in the status bar */
 	showStatusBar: boolean;
@@ -53,6 +65,10 @@ export const DEFAULT_SETTINGS: TextHiderPluginSettings = {
 	titleMode: "mask",
 	revealSelection: true,
 	maskReadingView: true,
+	screenTintEnabled: false,
+	screenTintBrightness: -15,
+	screenTintHue: 0,
+	screenTintIntensity: 0,
 	showStatusBar: true,
 };
 
@@ -208,6 +224,73 @@ export class TextHiderSettingTab extends PluginSettingTab {
 				});
 			});
 
+		new Setting(containerEl).setName("Screen tint").setHeading();
+
+		const screenTintDetailSettings: Setting[] = [];
+		const updateScreenTintSettingsVisibility = () => {
+			for (const setting of screenTintDetailSettings) {
+				setting.settingEl.toggleClass("text-hider-setting-hidden", !this.plugin.settings.screenTintEnabled);
+			}
+		};
+
+		new Setting(containerEl)
+			.setName("Enable screen tint")
+			.setDesc("Tint the entire Obsidian workspace while privacy mode is on.")
+			.addToggle((toggle) =>
+				toggle.setValue(this.plugin.settings.screenTintEnabled).onChange(async (value) => {
+					this.plugin.settings.screenTintEnabled = value;
+					updateScreenTintSettingsVisibility();
+					this.plugin.notifySettingsChanged();
+					await this.plugin.saveSettings();
+				})
+			);
+
+		const tintBrightnessSetting = new Setting(containerEl)
+			.setName("Tint brightness")
+			.setDesc("Make the workspace darker or lighter.")
+			.addSlider((slider) => {
+				slider
+					.setLimits(MIN_SCREEN_TINT_BRIGHTNESS, MAX_SCREEN_TINT_BRIGHTNESS, 1)
+					.setValue(this.plugin.settings.screenTintBrightness)
+					.setDynamicTooltip();
+				slider.sliderEl.addEventListener("input", () => {
+					this.plugin.settings.screenTintBrightness = Number(slider.sliderEl.value);
+					this.plugin.updateScreenTint();
+				});
+				slider.sliderEl.addEventListener("change", () => void this.plugin.saveSettings());
+			});
+		screenTintDetailSettings.push(tintBrightnessSetting);
+		const tintHueSetting = new Setting(containerEl)
+			.setName("Tint hue")
+			.setDesc("Choose the tint color.")
+			.addSlider((slider) => {
+				slider
+					.setLimits(MIN_SCREEN_TINT_HUE, MAX_SCREEN_TINT_HUE, 1)
+					.setValue(this.plugin.settings.screenTintHue)
+					.setDynamicTooltip();
+				slider.sliderEl.addEventListener("input", () => {
+					this.plugin.settings.screenTintHue = Number(slider.sliderEl.value);
+					this.plugin.updateScreenTint();
+				});
+				slider.sliderEl.addEventListener("change", () => void this.plugin.saveSettings());
+			});
+		screenTintDetailSettings.push(tintHueSetting);
+		const tintIntensitySetting = new Setting(containerEl)
+			.setName("Tint intensity")
+			.setDesc("Set the strength of the tint color.")
+			.addSlider((slider) => {
+				slider
+					.setLimits(MIN_SCREEN_TINT_INTENSITY, MAX_SCREEN_TINT_INTENSITY, 1)
+					.setValue(this.plugin.settings.screenTintIntensity)
+					.setDynamicTooltip();
+				slider.sliderEl.addEventListener("input", () => {
+					this.plugin.settings.screenTintIntensity = Number(slider.sliderEl.value);
+					this.plugin.updateScreenTint();
+				});
+				slider.sliderEl.addEventListener("change", () => void this.plugin.saveSettings());
+			});
+		screenTintDetailSettings.push(tintIntensitySetting);		updateScreenTintSettingsVisibility();
+
 		new Setting(containerEl).setName("Views & status").setHeading();
 
 		new Setting(containerEl)
@@ -220,7 +303,6 @@ export class TextHiderSettingTab extends PluginSettingTab {
 					this.plugin.notifySettingsChanged();
 				})
 			);
-
 		new Setting(containerEl)
 			.setName("Show status bar indicator")
 			.setDesc("Show the current privacy mode state in the status bar. Select it to toggle privacy mode.")
@@ -231,6 +313,8 @@ export class TextHiderSettingTab extends PluginSettingTab {
 					this.plugin.notifySettingsChanged();
 				})
 			);
+
+
 	}
 }
 
@@ -240,4 +324,15 @@ export function clampRevealCount(value: number): number {
 
 export function isCalloutMode(value: unknown): value is CalloutMode {
 	return value === "mask" || value === "exclude" || value === "hide";
+}
+export function clampScreenTintBrightness(value: number): number {
+	return Math.min(MAX_SCREEN_TINT_BRIGHTNESS, Math.max(MIN_SCREEN_TINT_BRIGHTNESS, value));
+}
+
+export function clampScreenTintHue(value: number): number {
+	return Math.min(MAX_SCREEN_TINT_HUE, Math.max(MIN_SCREEN_TINT_HUE, value));
+}
+
+export function clampScreenTintIntensity(value: number): number {
+	return Math.min(MAX_SCREEN_TINT_INTENSITY, Math.max(MIN_SCREEN_TINT_INTENSITY, value));
 }

@@ -2,6 +2,9 @@ import { Plugin } from "obsidian";
 import {
   CalloutMode,
   clampRevealCount,
+  clampScreenTintBrightness,
+  clampScreenTintHue,
+  clampScreenTintIntensity,
   DEFAULT_SETTINGS,
   isCalloutMode,
   TextHiderPluginSettings,
@@ -50,6 +53,10 @@ export default class TextHiderPlugin extends Plugin {
     this.privacy.onSettingsChanged();
   }
 
+  updateScreenTint() {
+    this.privacy.updateScreenTint();
+  }
+
   async loadSettings() {
     const saved = ((await this.loadData()) ?? {}) as Partial<TextHiderPluginSettings> & {
       excludeHeaders?: boolean;
@@ -59,6 +66,9 @@ export default class TextHiderPlugin extends Plugin {
     const { excludeHeaders, excludeCallouts, hideCallouts, ...currentSaved } = saved;
     const blurStrength = saved.blurStrength;
     const revealCount = saved.revealCount;
+    const screenTintBrightness = saved.screenTintBrightness;
+    const screenTintHue = saved.screenTintHue;
+    const screenTintIntensity = saved.screenTintIntensity;
     const calloutMode: CalloutMode = isCalloutMode(saved.calloutMode)
       ? saved.calloutMode
       : hideCallouts
@@ -86,7 +96,19 @@ const titleMode: CalloutMode = isCalloutMode(saved.titleMode) ? saved.titleMode 
       revealCount:
         typeof revealCount === "number" && Number.isFinite(revealCount)
           ? clampRevealCount(Math.round(revealCount))
-          : DEFAULT_SETTINGS.revealCount,
+: DEFAULT_SETTINGS.revealCount,
+      screenTintBrightness:
+        typeof screenTintBrightness === "number" && Number.isFinite(screenTintBrightness)
+          ? clampScreenTintBrightness(Math.round(screenTintBrightness))
+          : DEFAULT_SETTINGS.screenTintBrightness,
+      screenTintHue:
+        typeof screenTintHue === "number" && Number.isFinite(screenTintHue)
+          ? clampScreenTintHue(Math.round(screenTintHue))
+          : DEFAULT_SETTINGS.screenTintHue,
+      screenTintIntensity:
+        typeof screenTintIntensity === "number" && Number.isFinite(screenTintIntensity)
+          ? clampScreenTintIntensity(Math.round(screenTintIntensity))
+          : DEFAULT_SETTINGS.screenTintIntensity,
     };
   }
 

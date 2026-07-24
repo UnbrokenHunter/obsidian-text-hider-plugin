@@ -123,3 +123,17 @@
 .markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-header-mode-hide :is(h1, h2, h3, h4, h5, h6) {
   display: none !important;
 }
+.text-hider-screen-tint {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: none;
+  pointer-events: none;
+}
+
+.text-hider-screen-tint.is-active {
+  display: block;
+}
+.modal-container {
+  z-index: 1000 !important;
+}
