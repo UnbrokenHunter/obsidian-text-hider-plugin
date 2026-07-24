@@ -35,6 +35,29 @@ export default class TextHiderPlugin extends Plugin {
 			name: "Disable privacy mode",
 			callback: () => this.privacy?.setEnabled(false),
 		});
+		this.addCommand({
+			id: "set-mask-mode-hide",
+			name: "Set mask mode to hide",
+			callback: () => this.setMaskMode("hide"),
+		});
+		this.addCommand({
+			id: "set-mask-mode-blur",
+			name: "Set mask mode to blur",
+			callback: () => this.setMaskMode("blur"),
+		});
+		this.addCommand({
+			id: "set-mask-mode-password",
+			name: "Set mask mode to password",
+			callback: () => this.setMaskMode("password"),
+		});
+	}
+
+	private setMaskMode(maskMode: TextHiderPluginSettings["maskMode"]): void {
+		if (this.settings.maskMode === maskMode) return;
+
+		this.settings.maskMode = maskMode;
+		void this.saveSettings();
+		this.notifySettingsChanged();
 	}
 
 	notifySettingsChanged(): void {
