@@ -139,6 +139,14 @@ export function addExceptionsAndBehaviorSettings(containerEl: HTMLElement, plugi
 	addContentHandlingSetting(
 		containerEl,
 		plugin,
+		"Note title handling",
+		"Choose how privacy mode treats the inline note title.",
+		() => plugin.settings.titleMode,
+		(value) => { plugin.settings.titleMode = value; },
+	);
+	addContentHandlingSetting(
+		containerEl,
+		plugin,
 		"Header handling",
 		"Choose how privacy mode treats Markdown headers.",
 		() => plugin.settings.headerMode,
@@ -151,14 +159,6 @@ export function addExceptionsAndBehaviorSettings(containerEl: HTMLElement, plugi
 		"Choose how privacy mode treats Markdown callouts.",
 		() => plugin.settings.calloutMode,
 		(value) => { plugin.settings.calloutMode = value; },
-	);
-	addContentHandlingSetting(
-		containerEl,
-		plugin,
-		"Note title handling",
-		"Choose how privacy mode treats the inline note title.",
-		() => plugin.settings.titleMode,
-		(value) => { plugin.settings.titleMode = value; },
 	);
 }
 
