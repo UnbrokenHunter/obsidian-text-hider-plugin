@@ -135,6 +135,17 @@ export class TextHiderSettingTab extends PluginSettingTab {
 					})
 			);
 
+		new Setting(containerEl)
+			.setName("Reveal selected text")
+			.setDesc("Selected text becomes visible while selected.")
+			.addToggle((toggle) =>
+				toggle.setValue(this.plugin.settings.revealSelection).onChange(async (value) => {
+					this.plugin.settings.revealSelection = value;
+					await this.plugin.saveSettings();
+					this.plugin.notifySettingsChanged();
+				})
+			);
+
 		new Setting(containerEl).setName("Exceptions & behavior").setHeading();
 
 		new Setting(containerEl)
@@ -143,17 +154,6 @@ export class TextHiderSettingTab extends PluginSettingTab {
 			.addToggle((toggle) =>
 				toggle.setValue(this.plugin.settings.excludeHeaders).onChange(async (value) => {
 					this.plugin.settings.excludeHeaders = value;
-					await this.plugin.saveSettings();
-					this.plugin.notifySettingsChanged();
-				})
-			);
-
-		new Setting(containerEl)
-			.setName("Reveal selected text")
-			.setDesc("Selected text becomes visible while selected.")
-			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.revealSelection).onChange(async (value) => {
-					this.plugin.settings.revealSelection = value;
 					await this.plugin.saveSettings();
 					this.plugin.notifySettingsChanged();
 				})
