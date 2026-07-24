@@ -21,7 +21,7 @@ export default class TextHiderPlugin extends Plugin {
   }
 
   onunload() {
-    this.privacy.destroy();
+    this.privacy?.destroy();
   }
 
   private registerCommands() {
@@ -49,7 +49,7 @@ export default class TextHiderPlugin extends Plugin {
   }
 
   async loadSettings() {
-    const saved = (await this.loadData()) as Partial<TextHiderPluginSettings>;
+    const saved = ((await this.loadData()) ?? {}) as Partial<TextHiderPluginSettings>;
     const blurStrength = saved.blurStrength;
     const revealCount = saved.revealCount;
     this.settings = {

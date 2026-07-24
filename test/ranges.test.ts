@@ -72,6 +72,14 @@ test("sentence reveal keeps the focused sentence and supports multiple sentences
   ]);
 });
 
+test("line reveal keeps the focused line and reveals following lines", () => {
+  const doc = "first line\nsecond line\nthird line";
+  const state = EditorState.create({ doc, selection: { anchor: doc.indexOf("second") + 2 } });
+
+  assert.deepEqual(computeRevealRanges(state, "line"), [{ from: 11, to: 22 }]);
+  assert.deepEqual(computeRevealRanges(state, "line", 2), [{ from: 11, to: doc.length }]);
+});
+
 test("character reveal amount moves backward at document end", () => {
   const state = EditorState.create({ doc: "note", selection: { anchor: 4 } });
   assert.deepEqual(computeRevealRanges(state, "letter", 3), [{ from: 1, to: 4 }]);

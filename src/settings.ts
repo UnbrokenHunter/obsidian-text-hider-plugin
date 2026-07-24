@@ -2,7 +2,7 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import MyPlugin from "./main";
 
 export type MaskMode = "hide" | "password" | "blur";
-export type RevealMode = "word" | "letter" | "sentence";
+export type RevealMode = "word" | "letter" | "sentence" | "line";
 export const MIN_REVEAL_COUNT = 1;
 export const MAX_REVEAL_COUNT = 100;
 
@@ -16,7 +16,7 @@ export interface TextHiderPluginSettings {
 	/** What to reveal at the cursor */
 	revealMode: RevealMode;
 
-	/** How many adjacent characters, words, or sentences to reveal */
+	/** How many adjacent characters, words, sentences, or lines to reveal */
 	revealCount: number;
 
 	/** Blur radius in pixels when blur masking is selected */
@@ -113,6 +113,7 @@ export class TextHiderSettingTab extends PluginSettingTab {
 				dropdown.addOption("word", "Words");
 				dropdown.addOption("letter", "Characters");
 				dropdown.addOption("sentence", "Sentences");
+				dropdown.addOption("line", "Lines");
 				dropdown.setValue(this.plugin.settings.revealMode);
 				dropdown.onChange(async (value) => {
 					this.plugin.settings.revealMode = value as RevealMode;
@@ -123,7 +124,7 @@ export class TextHiderSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Reveal amount")
-			.setDesc("How many adjacent characters, words, or sentences to reveal (1–100).")
+			.setDesc("How many adjacent characters, words, sentences, or lines to reveal (1–100).")
 			.addText((text) =>
 				text
 					.setValue(String(this.plugin.settings.revealCount))

@@ -73,7 +73,12 @@ function computeRevealRange(
   }
 
   const text = state.doc.toString();
-  const units = revealMode === "sentence" ? getSentenceRanges(text) : getWordRanges(text);
+  const units =
+    revealMode === "sentence"
+      ? getSentenceRanges(text)
+      : revealMode === "line"
+        ? getLineRanges(state)
+        : getWordRanges(text);
   return getRangeWindow(units, pos, revealCount);
 }
 
@@ -91,6 +96,13 @@ function getRangeWindow(units: Range[], pos: number, count: number): Range[] {
 
 function getCharacterRanges(text: string): Range[] {
   return Array.from({ length: text.length }, (_, index) => ({ from: index, to: index + 1 }));
+}
+
+function getLineRanges(state: EditorState): Range[] {
+  return Array.from({ length: state.doc.lines }, (_, index) => {
+    const line = state.doc.line(index + 1);
+    return { from: line.from, to: line.to };
+  });
 }
 
 function getWordRanges(text: string): Range[] {
