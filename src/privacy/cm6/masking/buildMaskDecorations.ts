@@ -3,7 +3,7 @@ import { Decoration } from "@codemirror/view";
 import { RangeSetBuilder } from "@codemirror/state";
 import type { TextHiderPluginSettings } from "../../../settings";
 import { computeRevealRanges, subtractRanges, mergeRanges, type Range } from "./ranges";
-import { isHeaderLine } from "./headers";
+import { isCalloutBlockLine, isHeaderLine } from "./headers";
 
 export function buildMaskDecorations(
 	view: EditorView,
@@ -30,7 +30,9 @@ export function buildMaskDecorations(
 			const line = state.doc.lineAt(pos);
 			if (line.from > visibleRange.to) break;
 
-			const excludeThisLine = settings.excludeHeaders && isHeaderLine(line.text);
+			const excludeThisLine =
+				(settings.excludeHeaders && isHeaderLine(line.text)) ||
+				(settings.excludeCallouts && isCalloutBlockLine(state.doc, line.number));
 			if (!excludeThisLine) {
 				const lineRange: Range = { from: line.from, to: line.to };
 				const revealInLine = revealRanges

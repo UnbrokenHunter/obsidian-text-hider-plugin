@@ -25,11 +25,17 @@ export interface TextHiderPluginSettings {
 	/** Keep Markdown headers visible (#, ##, etc.) */
 	excludeHeaders: boolean;
 
+	/** Keep Markdown callouts visible */
+	excludeCallouts: boolean;
+
 	/** If enabled, selection becomes visible while selected */
 	revealSelection: boolean;
 
 	/** Apply masking to rendered Markdown in Reading View */
 	maskReadingView: boolean;
+
+	/** Hide rendered callout boxes while privacy mode is enabled */
+	hideCallouts: boolean;
 
 	/** Show the current privacy mode state in the status bar */
 	showStatusBar: boolean;
@@ -42,8 +48,10 @@ export const DEFAULT_SETTINGS: TextHiderPluginSettings = {
 	revealCount: 1,
 	blurStrength: 6,
 	excludeHeaders: true,
+	excludeCallouts: false,
 	revealSelection: true,
 	maskReadingView: true,
+	hideCallouts: false,
 	showStatusBar: true,
 };
 
@@ -149,6 +157,17 @@ export class TextHiderSettingTab extends PluginSettingTab {
 		new Setting(containerEl).setName("Exceptions & behavior").setHeading();
 
 		new Setting(containerEl)
+			.setName("Exclude callouts")
+			.setDesc("Keep Markdown callouts readable.")
+			.addToggle((toggle) =>
+				toggle.setValue(this.plugin.settings.excludeCallouts).onChange(async (value) => {
+					this.plugin.settings.excludeCallouts = value;
+					await this.plugin.saveSettings();
+					this.plugin.notifySettingsChanged();
+				})
+			);
+
+		new Setting(containerEl)
 			.setName("Exclude headers")
 			.setDesc("Keep Markdown headers (#, ##, ###) visible.")
 			.addToggle((toggle) =>
@@ -172,6 +191,16 @@ export class TextHiderSettingTab extends PluginSettingTab {
 				})
 			);
 
+		new Setting(containerEl)
+			.setName("Hide callouts")
+			.setDesc("Hide callout boxes in reading view while privacy mode is on.")
+			.addToggle((toggle) =>
+				toggle.setValue(this.plugin.settings.hideCallouts).onChange(async (value) => {
+					this.plugin.settings.hideCallouts = value;
+					await this.plugin.saveSettings();
+					this.plugin.notifySettingsChanged();
+				})
+			);
 		new Setting(containerEl)
 			.setName("Show status bar indicator")
 			.setDesc("Show the current privacy mode state in the status bar. Select it to toggle privacy mode.")

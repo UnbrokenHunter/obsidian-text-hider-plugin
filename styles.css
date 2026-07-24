@@ -36,6 +36,9 @@
 .markdown-reading-view.privacy-reading-view-enabled .privacy-reading-mask-blur {
   filter: blur(var(--text-hider-blur-strength, 6px));
 }
+.markdown-reading-view.privacy-reading-callouts-hidden .callout {
+  display: none;
+}
 
 .privacy-status-indicator {
   cursor: pointer;

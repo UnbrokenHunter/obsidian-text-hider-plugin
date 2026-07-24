@@ -6,6 +6,7 @@ import {
   mergeRanges,
   subtractRanges,
 } from "../src/privacy/cm6/masking/ranges";
+import { isCalloutBlockLine } from "../src/privacy/cm6/masking/headers";
 
 test("mergeRanges merges overlapping and adjacent ranges", () => {
   assert.deepEqual(mergeRanges([{ from: 8, to: 10 }, { from: 1, to: 4 }, { from: 4, to: 9 }]), [
@@ -73,6 +74,14 @@ test("line reveal keeps the focused line and reveals following lines", () => {
 
   assert.deepEqual(computeRevealRanges(state, "line"), [{ from: 11, to: 22 }]);
   assert.deepEqual(computeRevealRanges(state, "line", 2), [{ from: 11, to: doc.length }]);
+});
+
+test("callout block detection includes continuation lines but not regular quotes", () => {
+  const state = EditorState.create({ doc: "Normal\n> [!note] Callout\n> Continuation\n\n> Regular quote" });
+
+  assert.equal(isCalloutBlockLine(state.doc, 2), true);
+  assert.equal(isCalloutBlockLine(state.doc, 3), true);
+  assert.equal(isCalloutBlockLine(state.doc, 5), false);
 });
 
 test("character reveal amount moves backward at document end", () => {
