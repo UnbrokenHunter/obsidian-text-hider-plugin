@@ -95,7 +95,7 @@
   outline: none;
   border: none;
 }
-.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-line.privacy-callout-hidden {
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-line.privacy-hidden-line {
   display: none;
 }
 .text-hider-note-title-hidden .inline-title {

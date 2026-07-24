@@ -40,7 +40,7 @@ export function buildMaskDecorations(
 				(settings.calloutMode === "exclude" && isCalloutLine);
 
 			if (hideThisLine) {
-				builder.add(line.from, line.from, Decoration.line({ class: "privacy-callout-hidden" }));
+				builder.add(line.from, line.from, Decoration.line({ class: "privacy-hidden-line" }));
 			} else if (!excludeThisLine) {
 				const lineRange: Range = { from: line.from, to: line.to };
 				const revealInLine = revealRanges
