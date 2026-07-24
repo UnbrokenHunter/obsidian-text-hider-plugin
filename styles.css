@@ -98,3 +98,24 @@
 .markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-line.privacy-callout-hidden {
   display: none;
 }
+.text-hider-note-title-hidden .inline-title {
+  display: none !important;
+}
+
+.text-hider-note-title-masked.text-hider-note-title-mask-hide .inline-title,
+.text-hider-note-title-masked.text-hider-note-title-mask-hide .inline-title * {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+.text-hider-note-title-masked.text-hider-note-title-mask-password .inline-title,
+.text-hider-note-title-masked.text-hider-note-title-mask-password .inline-title * {
+  -webkit-text-security: disc;
+  font: inherit;
+  font-variant-ligatures: none;
+}
+
+.text-hider-note-title-masked.text-hider-note-title-mask-blur .inline-title {
+  filter: blur(var(--text-hider-blur-strength, 6px));
+}

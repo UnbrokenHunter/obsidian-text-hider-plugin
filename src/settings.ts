@@ -29,6 +29,9 @@ export interface TextHiderPluginSettings {
 	/** How privacy mode treats Markdown callouts */
 	calloutMode: CalloutMode;
 
+	/** How privacy mode treats the inline note title */
+	titleMode: CalloutMode;
+
 	/** If enabled, selection becomes visible while selected */
 	revealSelection: boolean;
 
@@ -47,6 +50,7 @@ export const DEFAULT_SETTINGS: TextHiderPluginSettings = {
 	blurStrength: 6,
 	excludeHeaders: true,
 	calloutMode: "mask",
+	titleMode: "mask",
 	revealSelection: true,
 	maskReadingView: true,
 	showStatusBar: true,
@@ -181,6 +185,20 @@ export class TextHiderSettingTab extends PluginSettingTab {
 				dropdown.setValue(this.plugin.settings.calloutMode);
 				dropdown.onChange(async (value) => {
 					this.plugin.settings.calloutMode = value as CalloutMode;
+					await this.plugin.saveSettings();
+					this.plugin.notifySettingsChanged();
+				});
+			});
+		new Setting(containerEl)
+			.setName("Note title handling")
+			.setDesc("Choose how privacy mode treats the inline note title.")
+			.addDropdown((dropdown) => {
+				dropdown.addOption("mask", "Mask text");
+				dropdown.addOption("exclude", "Keep visible");
+				dropdown.addOption("hide", "Hide completely");
+				dropdown.setValue(this.plugin.settings.titleMode);
+				dropdown.onChange(async (value) => {
+					this.plugin.settings.titleMode = value as CalloutMode;
 					await this.plugin.saveSettings();
 					this.plugin.notifySettingsChanged();
 				});

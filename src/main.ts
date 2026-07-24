@@ -65,11 +65,13 @@ export default class TextHiderPlugin extends Plugin {
         : excludeCallouts
           ? "exclude"
           : DEFAULT_SETTINGS.calloutMode;
+    const titleMode: CalloutMode = isCalloutMode(saved.titleMode) ? saved.titleMode : DEFAULT_SETTINGS.titleMode;
 
     this.settings = {
       ...DEFAULT_SETTINGS,
       ...currentSaved,
       calloutMode,
+      titleMode,
       blurStrength:
         typeof blurStrength === "number" && Number.isFinite(blurStrength)
           ? Math.min(16, Math.max(1, blurStrength))

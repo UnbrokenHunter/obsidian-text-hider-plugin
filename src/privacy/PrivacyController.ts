@@ -77,6 +77,7 @@ export class PrivacyController {
 
   destroy() {
     this.syncReadingViews(false, false);
+    this.syncNoteTitles(false);
     this.statusEl.remove();
   }
 
@@ -93,6 +94,7 @@ export class PrivacyController {
     }
 
     this.syncReadingViews(this.shouldMaskReadingView(), this.shouldHideCallouts());
+    this.syncNoteTitles();
     this.updateStatusIndicator();
   }
 
@@ -102,6 +104,19 @@ export class PrivacyController {
 
   private shouldHideCallouts(): boolean {
     return this.enabled && this.plugin.settings.calloutMode === "hide";
+  }
+  private syncNoteTitles(enabled = this.enabled) {
+    const maskTitle = enabled && this.plugin.settings.titleMode === "mask";
+    const hideTitle = enabled && this.plugin.settings.titleMode === "hide";
+
+    for (const view of this.getAllMarkdownViews()) {
+      const titleRoot = view.contentEl;
+      titleRoot.toggleClass("text-hider-note-title-masked", maskTitle);
+      titleRoot.toggleClass("text-hider-note-title-hidden", hideTitle);
+      titleRoot.toggleClass("text-hider-note-title-mask-hide", maskTitle && this.plugin.settings.maskMode === "hide");
+      titleRoot.toggleClass("text-hider-note-title-mask-password", maskTitle && this.plugin.settings.maskMode === "password");
+      titleRoot.toggleClass("text-hider-note-title-mask-blur", maskTitle && this.plugin.settings.maskMode === "blur");
+    }
   }
 
   private syncReadingViews(mask: boolean, hideCallouts: boolean) {
