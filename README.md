@@ -25,7 +25,7 @@
 
 - Reveal only the text around each cursor. Choose characters, words, sentences, or lines, then set how many adjacent units to reveal.
 - Optionally reveal selected text while it is selected.
-- Control how the inline note title, Markdown headers, callouts, and images are handled: keep them visible, mask them, or hide them completely.
+- Control how the inline note title, Markdown headers, callouts, and images are handled: ignore them, mask them, or hide them.
 - Add an optional transparent screen tint while privacy mode is enabled. Adjust its brightness, hue, and color intensity.
 
 ---
@@ -40,7 +40,7 @@ Select a mask style, choose what the cursor reveals, and set the reveal amount. 
 
 ### Exceptions and behavior
 
-Each of the following can be set to **Keep visible**, **Mask text**, or **Hide completely**:
+Each of the following can be set to **Ignore**, **Mask**, or **Hide**:
 
 - Inline note title
 - Markdown headers (`#`, `##`, `###`, and so on)

@@ -33,9 +33,9 @@ function addContentHandlingSetting(
 		.setName(name)
 		.setDesc(description)
 		.addDropdown((dropdown) => {
-			dropdown.addOption("exclude", "Keep visible");
-			dropdown.addOption("mask", "Mask text");
-			dropdown.addOption("hide", "Hide completely");
+			dropdown.addOption("exclude", "Ignore");
+			dropdown.addOption("mask", "Mask");
+			dropdown.addOption("hide", "Hide");
 			dropdown.setValue(getValue());
 			dropdown.onChange(async (value) => {
 				setValue(value as ContentHandlingMode);
