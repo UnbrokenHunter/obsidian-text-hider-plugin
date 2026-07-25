@@ -1,73 +1,103 @@
 # Text Hider
 
-**Text Hider** is an Obsidian plugin that visually hides note content while you edit or read it in public. It only changes what is displayed: notes are never changed, encrypted, or written to disk differently.
+**Text Hider** is an Obsidian plugin that visually masks note content while you edit or read it. It is useful for working in public without exposing your writing to people nearby.
 
-<p>
-  <img src="imgs/hide_mode_demo.png" alt="Hide mode demo" width="32%">
-  <img src="imgs/blur_mode_demo.png" alt="Blur mode demo" width="32%">
-  <img src="imgs/password_mode_demo.png" alt="Password mode demo" width="32%">
-</p>
+![Obsidian note with Text Hider enabled, where the focused text remains readable and surrounding content is masked](imgs/demo.png)
 
-<p>
-  <img src="imgs/word_select_demo.png" alt="Current word demo" width="32%">
-  <img src="imgs/letter_select_demo.png" alt="Current letter demo" width="32%">
-  <img src="imgs/selected_text_demo.png" alt="Reveal text demo" width="32%">
-</p>
+---
 
 ## Features
 
-- Toggleable text masking with Hide, Blur, and Password modes
-- Adjustable blur strength
-- Reveal the current word or letter at every cursor
-- Optionally reveal each cursor's entire current line
-- Optionally reveal selected text
-- Keep Markdown headers visible
-- Mask rendered text in Reading View
-- Optional, clickable status bar indicator
+- Toggle privacy mode from the Command Palette, a hotkey, or the status-bar indicator.
+- Mask notes in both the editor and Reading View without changing the underlying Markdown files.
+- Choose one of three masking styles:
+  - **Hide** — completely removes text from view while retaining the layout.
+
+    ![Obsidian editor with Text Hider's Hide mode, where note text is invisible](imgs/hidden.png)
+
+  - **Blur** — obscures text while preserving its visual shape and layout.
+
+    ![Obsidian editor with Text Hider's Blur mode, where note text is heavily blurred](imgs/blur.png)
+
+  - **Password** — displays bullet-style masking; its appearance can vary by theme.
+
+    ![Obsidian editor with Text Hider's Password mode, where note text is replaced with masking bullets](imgs/password.png)
+
+- Reveal only the text around each cursor. Choose characters, words, sentences, or lines, then set how many adjacent units to reveal.
+- Optionally reveal selected text while it is selected.
+- Control how the inline note title, Markdown headers, and callouts are handled: keep them visible, mask them, or hide them completely.
+- Add an optional transparent screen tint while privacy mode is enabled. Adjust its brightness, hue, and color intensity.
+
+---
 
 ## Settings
 
-### Mask mode
+### Masking and reveal
 
-Choose how hidden text is displayed:
+Select a mask style, choose what the cursor reveals, and set the reveal amount. Blur strength is shown only when **Blur** mode is selected.
 
-- **Hide**: completely invisible while preserving layout.
-- **Blur**: obscures text while preserving structure. Use **Blur strength** to control the effect.
-- **Password**: bullet-style masking. Appearance can vary by theme.
+![Text Hider settings showing the Reveal mode selector and reveal amount field](imgs/reveal_settings.png)
 
-### Reveal behavior
+### Exceptions and behavior
 
-Choose whether the current word or current letter remains readable at each cursor. You can also reveal all selected text or each cursor's entire current line.
+Each of the following can be set to **Keep visible**, **Mask text**, or **Hide completely**:
 
-### Views and status
+- Inline note title
+- Markdown headers (`#`, `##`, `###`, and so on)
+- Markdown callouts
 
-**Mask Reading View** protects rendered Markdown text as well as Live Preview and Source mode. Images and other media remain unchanged. **Show status bar indicator** adds an on/off indicator that can be selected to toggle the plugin.
+By default, Text Hider keeps note titles visible and masks headers and callouts.
+
+### Reveal selected text
+
+When enabled, selected text becomes visible while it is selected.
+
+### Screen tint
+
+Enable a transparent workspace overlay while privacy mode is active. **Tint brightness** darkens or lightens the workspace, while **Tint hue** and **Tint intensity** add a color tint. The overlay always remains transparent and is displayed behind Obsidian settings dialogs.
+
+![Text Hider settings showing the screen-tint toggle and sliders for brightness, hue, and intensity](imgs/screen_tint_settings.png)
+
+![Obsidian workspace with Text Hider privacy mode active and a transparent colored screen tint applied](imgs/screen_tint.png)
+
+---
 
 ## Commands and hotkeys
 
-Text Hider provides three commands:
+Text Hider provides these Command Palette actions:
 
 - **Toggle privacy mode**
 - **Enable privacy mode**
 - **Disable privacy mode**
+- **Set mask mode to hide**
+- **Set mask mode to blur**
+- **Set mask mode to password**
 
-Bind a hotkey in **Settings -> Hotkeys** or use the Command Palette. When the status bar indicator is enabled, selecting it also toggles privacy mode.
+You can assign a different hotkey to each command:
+
+1. Open **Settings → Hotkeys**.
+2. Search for **Text Hider**.
+3. Assign your preferred keybinding.
+
+---
 
 ## Notes and limitations
 
-- Text Hider runs entirely locally and makes no network requests.
-- Reading View masking wraps rendered text only while privacy mode is enabled. It does not alter the note source.
-- Some themes may slightly affect blur or password masking appearance.
+- Text Hider works at the display level in the editor and Reading View.
+- It does not change, encrypt, or write to note files.
+- Images and other media remain unchanged.
+- Themes can slightly affect the appearance of blur and password masking.
 
-## Development
+Turn privacy mode off at any time to show your notes normally.
 
-```bash
-npm install
-npm test
-npm run lint
-npm run build
-```
+---
+
+## Development status
+
+Text Hider is under active development. Feedback, bug reports, and suggestions are welcome.
+
+---
 
 ## License
 
-0BSD
+ISC
