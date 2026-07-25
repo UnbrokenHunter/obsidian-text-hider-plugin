@@ -3,7 +3,7 @@
 	"name": "Text Hider",
 	"version": "1.1.0",
 	"minAppVersion": "1.5.0",
-	"description": "Visually hides note text while editing to protect privacy in public.",
+	"description": "Visually masks note content in the editor and Reading View to protect privacy in public.",
 	"author": "Hunter",
 	"authorUrl": "https://github.com/UnbrokenHunter",
 	"isDesktopOnly": false
