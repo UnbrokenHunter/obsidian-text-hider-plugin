@@ -53,6 +53,7 @@ export function normalizeSettings(raw: unknown): TextHiderPluginSettings {
 		blurStrength: clampBlurStrength(validNumber(saved.blurStrength, DEFAULT_SETTINGS.blurStrength)),
 		headerMode,
 		calloutMode,
+		imageMode: contentMode(saved.imageMode, DEFAULT_SETTINGS.imageMode),
 		titleMode: contentMode(saved.titleMode, DEFAULT_SETTINGS.titleMode),
 		revealSelection: typeof saved.revealSelection === "boolean"
 			? saved.revealSelection

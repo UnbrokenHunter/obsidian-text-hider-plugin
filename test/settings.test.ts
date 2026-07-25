@@ -22,11 +22,13 @@ test("keeps explicit content handling settings over legacy values", () => {
 	const settings = normalizeSettings({
 		headerMode: "hide",
 		calloutMode: "exclude",
+		imageMode: "hide",
 		hideCallouts: true,
 	});
 
 	assert.equal(settings.headerMode, "hide");
 	assert.equal(settings.calloutMode, "exclude");
+	assert.equal(settings.imageMode, "hide");
 });
 
 test("clamps saved numeric settings and rejects invalid modes", () => {

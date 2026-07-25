@@ -10,6 +10,7 @@ export interface TextHiderPluginSettings {
 	blurStrength: number;
 	headerMode: ContentHandlingMode;
 	calloutMode: ContentHandlingMode;
+	imageMode: ContentHandlingMode;
 	titleMode: ContentHandlingMode;
 	revealSelection: boolean;
 	maskReadingView: boolean;
@@ -28,6 +29,7 @@ export const DEFAULT_SETTINGS: TextHiderPluginSettings = {
 	blurStrength: 6,
 	headerMode: "mask",
 	calloutMode: "mask",
+	imageMode: "mask",
 	titleMode: "exclude",
 	revealSelection: true,
 	maskReadingView: true,

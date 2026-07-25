@@ -11,21 +11,21 @@
 - Toggle privacy mode from the Command Palette, a hotkey, or the status-bar indicator.
 - Mask notes in both the editor and Reading View without changing the underlying Markdown files.
 - Choose one of three masking styles:
-  - **Hide** — completely removes text from view while retaining the layout.
+  - **Hide** - completely removes text from view while retaining the layout.
 
     ![Obsidian editor with Text Hider's Hide mode, where note text is invisible](imgs/hidden.png)
 
-  - **Blur** — obscures text while preserving its visual shape and layout.
+  - **Blur** - obscures text while preserving its visual shape and layout.
 
     ![Obsidian editor with Text Hider's Blur mode, where note text is heavily blurred](imgs/blur.png)
 
-  - **Password** — displays bullet-style masking; its appearance can vary by theme.
+  - **Password** - displays bullet-style masking; its appearance can vary by theme.
 
     ![Obsidian editor with Text Hider's Password mode, where note text is replaced with masking bullets](imgs/password.png)
 
 - Reveal only the text around each cursor. Choose characters, words, sentences, or lines, then set how many adjacent units to reveal.
 - Optionally reveal selected text while it is selected.
-- Control how the inline note title, Markdown headers, and callouts are handled: keep them visible, mask them, or hide them completely.
+- Control how the inline note title, Markdown headers, callouts, and images are handled: keep them visible, mask them, or hide them completely.
 - Add an optional transparent screen tint while privacy mode is enabled. Adjust its brightness, hue, and color intensity.
 
 ---
@@ -45,8 +45,9 @@ Each of the following can be set to **Keep visible**, **Mask text**, or **Hide c
 - Inline note title
 - Markdown headers (`#`, `##`, `###`, and so on)
 - Markdown callouts
+- Note images
 
-By default, Text Hider keeps note titles visible and masks headers and callouts.
+By default, Text Hider keeps note titles visible and masks headers, callouts, and images.
 
 ### Reveal selected text
 
@@ -75,7 +76,7 @@ Text Hider provides these Command Palette actions:
 
 You can assign a different hotkey to each command:
 
-1. Open **Settings → Hotkeys**.
+1. Open **Settings -> Hotkeys**.
 2. Search for **Text Hider**.
 3. Assign your preferred keybinding.
 
@@ -85,7 +86,7 @@ You can assign a different hotkey to each command:
 
 - Text Hider works at the display level in the editor and Reading View.
 - It does not change, encrypt, or write to note files.
-- Images and other media remain unchanged.
+- Image handling applies to note images; other media remain unchanged.
 - Themes can slightly affect the appearance of blur and password masking.
 
 Turn privacy mode off at any time to show your notes normally.

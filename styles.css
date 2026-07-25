@@ -137,3 +137,23 @@
 .modal-container {
   z-index: 1000 !important;
 }
+/* Image handling */
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-image-mode-hide :is(.image-embed, img),
+.privacy-reading-image-mode-hide :is(.image-embed, img) {
+  display: none !important;
+}
+
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-image-mode-mask.privacy-mask-mode-hide img,
+.privacy-reading-image-mode-mask.privacy-reading-image-mask-mode-hide img {
+  opacity: 0;
+}
+
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-image-mode-mask.privacy-mask-mode-blur img,
+.privacy-reading-image-mode-mask.privacy-reading-image-mask-mode-blur img {
+  filter: blur(var(--text-hider-blur-strength, 6px));
+}
+
+.markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-image-mode-mask.privacy-mask-mode-password img,
+.privacy-reading-image-mode-mask.privacy-reading-image-mask-mode-password img {
+  filter: grayscale(1) contrast(0) brightness(0.45);
+}

@@ -160,6 +160,14 @@ export function addExceptionsAndBehaviorSettings(containerEl: HTMLElement, plugi
 		() => plugin.settings.calloutMode,
 		(value) => { plugin.settings.calloutMode = value; },
 	);
+	addContentHandlingSetting(
+		containerEl,
+		plugin,
+		"Image handling",
+		"Choose how privacy mode treats note images.",
+		() => plugin.settings.imageMode,
+		(value) => { plugin.settings.imageMode = value; },
+	);
 }
 
 function addTintSlider(

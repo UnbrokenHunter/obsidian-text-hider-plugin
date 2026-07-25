@@ -10,6 +10,9 @@ const READING_MASK_CLASS = "privacy-reading-mask";
 const READING_VIEW_CLASS = "privacy-reading-view-enabled";
 const READING_HIDE_CALLOUTS_CLASS = "privacy-reading-callouts-hidden";
 const READING_HIDE_HEADERS_CLASS = "privacy-reading-headers-hidden";
+const READING_IMAGE_MODE_MASK_CLASS = "privacy-reading-image-mode-mask";
+const READING_IMAGE_MODE_HIDE_CLASS = "privacy-reading-image-mode-hide";
+const READING_IMAGE_MASK_MODE_PREFIX = "privacy-reading-image-mask-mode-";
 const READING_EXCLUDED_SELECTOR = "script, style, textarea, input, button, select, option, svg";
 
 export class PrivacyController {
@@ -84,7 +87,7 @@ export class PrivacyController {
   }
 
   destroy() {
-    this.syncReadingViews(false, false, false);
+    this.syncReadingViews(false, false, false, "exclude");
     this.syncNoteTitles(false);
     this.screenTint.destroy();
     this.statusEl.remove();
@@ -102,7 +105,7 @@ export class PrivacyController {
       if (editorView) editorView.dispatch({ effects: effect });
     }
 
-    this.syncReadingViews(this.shouldMaskReadingView(), this.shouldHideCallouts(), this.shouldHideHeaders());
+    this.syncReadingViews(this.shouldMaskReadingView(), this.shouldHideCallouts(), this.shouldHideHeaders(), this.getReadingImageMode());
     this.syncNoteTitles();
     this.syncScreenTint();
     this.updateStatusIndicator();
@@ -118,6 +121,10 @@ export class PrivacyController {
 
   private shouldHideHeaders(): boolean {
     return this.enabled && this.plugin.settings.headerMode === "hide";
+  }
+
+  private getReadingImageMode(): "mask" | "exclude" | "hide" {
+    return this.shouldMaskReadingView() ? this.plugin.settings.imageMode : "exclude";
   }
   private syncNoteTitles(enabled = this.enabled) {
     const maskTitle = enabled && this.plugin.settings.titleMode === "mask";
@@ -136,17 +143,27 @@ export class PrivacyController {
   private syncScreenTint() {
     this.screenTint.sync(this.enabled, this.plugin.settings);
   }
-  private syncReadingViews(mask: boolean, hideCallouts: boolean, hideHeaders: boolean) {
+  private syncReadingViews(mask: boolean, hideCallouts: boolean, hideHeaders: boolean, imageMode: "mask" | "exclude" | "hide") {
     for (const view of this.getAllMarkdownViews()) {
       if (view.getMode() !== "preview") continue;
-      this.syncReadingView(view.previewMode.containerEl, mask, hideCallouts, hideHeaders);
+      this.syncReadingView(view.previewMode.containerEl, mask, hideCallouts, hideHeaders, imageMode);
     }
   }
 
-  private syncReadingView(container: HTMLElement, mask: boolean, hideCallouts: boolean, hideHeaders: boolean) {
+  private syncReadingView(container: HTMLElement, mask: boolean, hideCallouts: boolean, hideHeaders: boolean, imageMode: "mask" | "exclude" | "hide") {
     container.toggleClass(READING_VIEW_CLASS, mask);
     container.toggleClass(READING_HIDE_CALLOUTS_CLASS, hideCallouts);
     container.toggleClass(READING_HIDE_HEADERS_CLASS, hideHeaders);
+    container.toggleClass(READING_IMAGE_MODE_MASK_CLASS, imageMode === "mask");
+    container.toggleClass(READING_IMAGE_MODE_HIDE_CLASS, imageMode === "hide");
+    container.removeClasses([
+      `${READING_IMAGE_MASK_MODE_PREFIX}hide`,
+      `${READING_IMAGE_MASK_MODE_PREFIX}password`,
+      `${READING_IMAGE_MASK_MODE_PREFIX}blur`,
+    ]);
+    if (imageMode === "mask") {
+      container.addClass(`${READING_IMAGE_MASK_MODE_PREFIX}${this.plugin.settings.maskMode}`);
+    }
 
     if (!mask) {
       container.style.removeProperty("--text-hider-blur-strength");
