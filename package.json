@@ -13,7 +13,7 @@
 		"release:minor": "node scripts/release.mjs minor",
 		"release:major": "node scripts/release.mjs major",
 		"lint": "eslint .",
-		"test": "tsx --test test/ranges.test.ts test/settings.test.ts test/screen-tint.test.ts test/reading-image.test.ts"
+		"test": "tsx --test test/ranges.test.ts test/settings.test.ts test/screen-tint.test.ts test/reading-image.test.ts test/release.test.ts"
 	},
 	"keywords": [
 		"obsidian",

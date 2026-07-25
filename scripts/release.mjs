@@ -1,13 +1,9 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import process from "node:process";
+import { assertReleasePreflight, getNextVersion } from "./release-utils.mjs";
 
 const bumpType = process.argv[2];
-const allowedBumpTypes = new Set(["patch", "minor", "major"]);
-
-if (!allowedBumpTypes.has(bumpType)) {
-	throw new Error("Usage: node scripts/release.mjs <patch|minor|major>");
-}
 
 function run(command, args) {
 	execFileSync(command, args, { stdio: "inherit" });
@@ -17,28 +13,29 @@ function output(command, args) {
 	return execFileSync(command, args, { encoding: "utf8" }).trim();
 }
 
-function assertCleanWorkingTree() {
-	if (output("git", ["status", "--porcelain"])) {
-		throw new Error("Commit, stash, or discard existing changes before starting a release.");
-	}
-}
-
-function assertMainBranch() {
-	if (output("git", ["branch", "--show-current"]) !== "main") {
-		throw new Error("Run releases from the main branch.");
-	}
-}
-
 function readVersion() {
 	return JSON.parse(readFileSync("package.json", "utf8")).version;
 }
 
-assertCleanWorkingTree();
-assertMainBranch();
+const currentVersion = readVersion();
+const nextVersion = getNextVersion(currentVersion, bumpType);
+const branch = output("git", ["branch", "--show-current"]);
+const clean = !output("git", ["status", "--porcelain"]);
+
+assertReleasePreflight({ branch, clean, tagExists: false });
+run("git", ["fetch", "--tags", "origin"]);
+assertReleasePreflight({
+	branch,
+	clean,
+	tagExists: output("git", ["tag", "--list", nextVersion]) === nextVersion,
+});
 
 run("npm", ["version", bumpType, "--no-git-tag-version"]);
 
 const version = readVersion();
+if (version !== nextVersion) {
+	throw new Error(`Expected npm to set version ${nextVersion}, received ${version}.`);
+}
 run("npm", ["run", "verify:release"]);
 run("git", ["diff", "--check"]);
 run("git", ["add", "package.json", "package-lock.json", "manifest.json", "versions.json"]);
