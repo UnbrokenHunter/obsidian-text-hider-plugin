@@ -1,5 +1,9 @@
 export const RELEASE_BUMP_TYPES = new Set(["patch", "minor", "major"]);
 
+export function getNpmCommand(platform) {
+	return platform === "win32" ? "npm.cmd" : "npm";
+}
+
 export function getNextVersion(currentVersion, bumpType) {
 	const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(currentVersion);
 	if (!match) {

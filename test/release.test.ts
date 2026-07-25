@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertReleasePreflight, getNextVersion } from "../scripts/release-utils.mjs";
+import { assertReleasePreflight, getNextVersion, getNpmCommand } from "../scripts/release-utils.mjs";
 
 test("release preflight accepts a clean main branch with a new tag", () => {
 	assert.doesNotThrow(() => assertReleasePreflight({ branch: "main", clean: true, tagExists: false }));
@@ -33,4 +33,10 @@ test("release version calculation produces stable matching tags", () => {
 	assert.equal(getNextVersion("1.1.0", "major"), "2.0.0");
 	assert.throws(() => getNextVersion("1.1.0-beta.1", "patch"), /stable semantic version/);
 	assert.throws(() => getNextVersion("1.1.0", "invalid"), /Usage/);
+});
+
+test("release automation invokes npm through the platform-specific executable", () => {
+	assert.equal(getNpmCommand("win32"), "npm.cmd");
+	assert.equal(getNpmCommand("linux"), "npm");
+	assert.equal(getNpmCommand("darwin"), "npm");
 });
