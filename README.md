@@ -99,6 +99,20 @@ Text Hider is under active development. Feedback, bug reports, and suggestions a
 
 ---
 
+## Releasing
+
+From a clean local `main` branch, run one of these commands:
+
+```powershell
+npm run release:patch
+npm run release:minor
+npm run release:major
+```
+
+The command updates the plugin version files, verifies the release artifacts, creates a release commit and matching Git tag, then pushes both. Pushing the tag triggers GitHub Actions to publish the GitHub release with `main.js`, `manifest.json`, and `styles.css`.
+
+---
+
 ## License
 
 ISC

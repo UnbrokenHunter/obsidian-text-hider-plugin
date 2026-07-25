@@ -9,6 +9,9 @@
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"verify:release": "npm run build && node scripts/verify-release.mjs",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
+		"release:patch": "node scripts/release.mjs patch",
+		"release:minor": "node scripts/release.mjs minor",
+		"release:major": "node scripts/release.mjs major",
 		"lint": "eslint .",
 		"test": "tsx --test test/ranges.test.ts test/settings.test.ts test/screen-tint.test.ts"
 	},
