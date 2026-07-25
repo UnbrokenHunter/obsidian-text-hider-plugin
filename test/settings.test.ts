@@ -7,6 +7,15 @@ test("normalizes missing settings to defaults", () => {
 	assert.deepEqual(normalizeSettings(null), DEFAULT_SETTINGS);
 });
 
+test("defaults to ignoring note titles and masking headers, callouts, and images", () => {
+	const settings = normalizeSettings(null);
+
+	assert.equal(settings.titleMode, "exclude");
+	assert.equal(settings.headerMode, "mask");
+	assert.equal(settings.calloutMode, "mask");
+	assert.equal(settings.imageMode, "mask");
+});
+
 test("migrates legacy header and callout settings", () => {
 	const settings = normalizeSettings({
 		excludeHeaders: false,

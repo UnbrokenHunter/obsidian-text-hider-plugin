@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { EditorSelection, EditorState } from "@codemirror/state";
+import type { EditorView } from "@codemirror/view";
 import {
   computeRevealRanges,
   mergeRanges,
   subtractRanges,
 } from "../src/privacy/cm6/masking/ranges";
 import { isCalloutBlockLine } from "../src/privacy/cm6/masking/headers";
+import { buildMaskDecorations } from "../src/privacy/cm6/masking/buildMaskDecorations";
+import { DEFAULT_SETTINGS, type ContentHandlingMode } from "../src/settings/types";
 
 test("mergeRanges merges overlapping and adjacent ranges", () => {
   assert.deepEqual(mergeRanges([{ from: 8, to: 10 }, { from: 1, to: 4 }, { from: 4, to: 9 }]), [
@@ -88,3 +91,61 @@ test("character reveal amount moves backward at document end", () => {
   const state = EditorState.create({ doc: "note", selection: { anchor: 4 } });
   assert.deepEqual(computeRevealRanges(state, "letter", 3), [{ from: 1, to: 4 }]);
 });
+
+test("header and callout handling modes create the expected masking decorations", () => {
+  const ignored = getContentHandlingDecorations("exclude", "exclude");
+  assert.equal(ignored.hiddenLines.length, 0);
+  assert.equal(hasMaskOnLine(ignored, 1), false);
+  assert.equal(hasMaskOnLine(ignored, 2), false);
+  assert.equal(hasMaskOnLine(ignored, 3), false);
+
+  const masked = getContentHandlingDecorations("mask", "mask");
+  assert.equal(masked.hiddenLines.length, 0);
+  assert.equal(hasMaskOnLine(masked, 1), true);
+  assert.equal(hasMaskOnLine(masked, 2), true);
+  assert.equal(hasMaskOnLine(masked, 3), true);
+
+  const hidden = getContentHandlingDecorations("hide", "hide");
+  assert.deepEqual(hidden.hiddenLines, [1, 2, 3]);
+  assert.equal(hasMaskOnLine(hidden, 1), false);
+  assert.equal(hasMaskOnLine(hidden, 2), false);
+  assert.equal(hasMaskOnLine(hidden, 3), false);
+});
+
+type ContentHandlingDecorations = {
+  hiddenLines: number[];
+  maskedLines: number[];
+};
+
+function getContentHandlingDecorations(
+  headerMode: ContentHandlingMode,
+  calloutMode: ContentHandlingMode,
+): ContentHandlingDecorations {
+  const doc = "# Heading\n> [!note] Callout\n> Continuation\nBody text";
+  const state = EditorState.create({ doc, selection: { anchor: doc.indexOf("Body") + 1 } });
+  const view = {
+    state,
+    visibleRanges: [{ from: 0, to: state.doc.length }],
+  } as unknown as EditorView;
+  const decorations = buildMaskDecorations(view, true, {
+    ...DEFAULT_SETTINGS,
+    headerMode,
+    calloutMode,
+  });
+  const hiddenLines: number[] = [];
+  const maskedLines: number[] = [];
+
+  decorations.between(0, state.doc.length, (from, _to, value) => {
+    const className = (value as { spec: { class?: string } }).spec.class;
+    const lineNumber = state.doc.lineAt(from).number;
+
+    if (className === "privacy-hidden-line") hiddenLines.push(lineNumber);
+    if (className === "privacy-mask-blur") maskedLines.push(lineNumber);
+  });
+
+  return { hiddenLines, maskedLines };
+}
+
+function hasMaskOnLine(decorations: ContentHandlingDecorations, lineNumber: number): boolean {
+  return decorations.maskedLines.includes(lineNumber);
+}
