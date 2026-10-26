@@ -63,6 +63,11 @@
   cursor: pointer;
 }
 
+/* Obsidian's status bar display rule overrides the native hidden attribute. */
+.privacy-status-indicator[hidden] {
+  display: none !important;
+}
+
 .text-hider-setting-hidden {
   display: none;
 }
