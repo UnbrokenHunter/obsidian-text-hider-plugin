@@ -5,9 +5,7 @@ export class ScreenTintController {
 	private readonly element: HTMLElement;
 
 	constructor(document: Document) {
-		this.element = document.createElement("div");
-		this.element.addClass("text-hider-screen-tint");
-		document.body.appendChild(this.element);
+		this.element = document.body.createDiv({ cls: "text-hider-screen-tint" });
 	}
 
 	sync(enabled: boolean, settings: TextHiderPluginSettings): void {

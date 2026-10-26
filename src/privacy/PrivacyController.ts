@@ -191,8 +191,7 @@ export class PrivacyController {
       const parent = textNode.parentElement;
       if (!parent) continue;
 
-      const span = root.ownerDocument.createElement("span");
-      span.className = `${READING_MASK_CLASS} ${this.getReadingMaskClass()}`;
+      const span = parent.createSpan({ cls: `${READING_MASK_CLASS} ${this.getReadingMaskClass()}` });
       parent.replaceChild(span, textNode);
       span.appendChild(textNode);
     }
