@@ -1,7 +1,7 @@
 {
 	"id": "text-hider",
 	"name": "Text Hider",
-	"version": "1.2.1",
+	"version": "1.3.0",
 	"minAppVersion": "1.5.0",
 	"description": "Visually masks note content in the editor and Reading View to protect privacy in public.",
 	"author": "Hunter",
