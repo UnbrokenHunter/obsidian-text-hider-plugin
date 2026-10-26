@@ -19,7 +19,7 @@ type SavedSettings = Partial<TextHiderPluginSettings> & {
 };
 
 function asRecord(value: unknown): SavedSettings {
-	return value !== null && typeof value === "object" ? value as SavedSettings : {};
+	return value !== null && typeof value === "object" ? value : {};
 }
 
 function validNumber(value: unknown, fallback: number): number {
