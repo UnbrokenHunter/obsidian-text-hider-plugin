@@ -1,6 +1,6 @@
 {
 	"name": "text-hider",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "Visually masks Obsidian note content in the editor and Reading View to protect privacy in public.",
 	"main": "main.js",
 	"type": "module",
