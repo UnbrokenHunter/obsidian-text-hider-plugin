@@ -36,9 +36,9 @@
 .privacy-reading-view-enabled .privacy-reading-mask-blur {
   filter: blur(var(--text-hider-blur-strength, 6px));
 }
-.privacy-reading-callouts-hidden .callout,
+body .workspace-leaf-content .privacy-reading-callouts-hidden .callout,
 .markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-callout-mode-hide .callout {
-  display: none !important;
+  display: none;
 }
 
 .markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-callout-mode-mask.privacy-mask-mode-hide .callout,
@@ -64,8 +64,8 @@
 }
 
 /* Obsidian's status bar display rule overrides the native hidden attribute. */
-.privacy-status-indicator[hidden] {
-  display: none !important;
+body .status-bar .status-bar-item.privacy-status-indicator[hidden] {
+  display: none;
 }
 
 .text-hider-setting-hidden {
@@ -103,8 +103,8 @@
 .markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled .cm-line.privacy-hidden-line {
   display: none;
 }
-.text-hider-note-title-hidden .inline-title {
-  display: none !important;
+body .workspace-leaf-content.text-hider-note-title-hidden .inline-title {
+  display: none;
 }
 
 .text-hider-note-title-masked.text-hider-note-title-mask-hide .inline-title,
@@ -124,14 +124,14 @@
 .text-hider-note-title-masked.text-hider-note-title-mask-blur .inline-title {
   filter: blur(var(--text-hider-blur-strength, 6px));
 }
-.privacy-reading-headers-hidden :is(h1, h2, h3, h4, h5, h6),
+body .workspace-leaf-content .privacy-reading-headers-hidden :is(h1, h2, h3, h4, h5, h6),
 .markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-header-mode-hide :is(h1, h2, h3, h4, h5, h6) {
-  display: none !important;
+  display: none;
 }
 .text-hider-screen-tint {
   position: fixed;
   inset: 0;
-  z-index: 999;
+  z-index: calc(var(--layer-modal, 50) - 1);
   display: none;
   pointer-events: none;
 }
@@ -139,13 +139,10 @@
 .text-hider-screen-tint.is-active {
   display: block;
 }
-.modal-container {
-  z-index: 1000 !important;
-}
 /* Image handling */
 .markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-image-mode-hide :is(.image-embed, img),
-.privacy-reading-image-mode-hide :is(.image-embed, img) {
-  display: none !important;
+body .workspace-leaf-content .privacy-reading-image-mode-hide :is(.image-embed, img) {
+  display: none;
 }
 
 .markdown-source-view.mod-cm6 .cm-editor.privacy-mode-enabled.privacy-image-mode-mask.privacy-mask-mode-hide img,
