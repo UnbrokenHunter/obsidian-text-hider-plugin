@@ -13,7 +13,7 @@
 		"release:minor": "node scripts/release.mjs minor",
 		"release:major": "node scripts/release.mjs major",
 		"lint": "eslint .",
-		"test": "tsx --test test/ranges.test.ts test/settings.test.ts test/screen-tint.test.ts test/reading-image.test.ts test/release.test.ts"
+		"test": "tsx --test test/ranges.test.ts test/settings.test.ts test/screen-tint.test.ts test/reading-image.test.ts test/release.test.ts test/settings-ui.test.ts"
 	},
 	"keywords": [
 		"obsidian",
@@ -30,7 +30,7 @@
 		"eslint-plugin-obsidianmd": "0.1.9",
 		"globals": "14.0.0",
 		"jiti": "2.6.1",
-		"obsidian": "latest",
+		"obsidian": "1.13.0",
 		"tslib": "2.4.0",
 		"tsx": "^4.23.0",
 		"typescript": "^5.8.3",
