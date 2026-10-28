@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, type SettingDefinitionItem } from "obsidian";
+import { App, PluginSettingTab, requireApiVersion, Setting, type SettingDefinitionItem } from "obsidian";
 import type TextHiderPlugin from "../main";
 import { createSettingsSections } from "./sections";
 
@@ -37,7 +37,7 @@ export class TextHiderSettingTab extends PluginSettingTab {
 
 	private refreshVisibility(): void {
 		for (const refresh of this.legacyVisibility) refresh();
-		this.refreshDomState?.();
+		if (requireApiVersion("1.13.0")) this.refreshDomState();
 	}
 
 	hide(): void {
